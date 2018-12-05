@@ -1226,7 +1226,7 @@ function g2_imagebypathinpost($text) {
 	// Get WPG2 Option Settings
 	$wpg2_option = get_option('wpg2_options');
 
-	$output = preg_replace("/<wpg2>(.*?)<\/wpg2>/ei", "g2_tagimageblock('\\1')", $text);
+	$output = preg_replace_callback('/<wpg2>(.*?)<\/wpg2>/', create_function('$m', 'return g2_tagimageblock($m[1]);'), $text);
 
 	return $output;
 }
@@ -1242,7 +1242,7 @@ function g2_imagebyidinpost($text) {
 	// Get WPG2 Option Settings
 	$wpg2_option = get_option('wpg2_options');
 
-	$output = preg_replace("/<wpg2id>(.*?)<\/wpg2id>/ei", "g2_tagimageblock('\\1')", $text);
+	$output = preg_replace_callback('/<wpg2id>(.*?)<\/wpg2id>/i', create_function('$m', 'return g2_tagimageblock($m[1]);'), $text);
 
 	return $output;
 }

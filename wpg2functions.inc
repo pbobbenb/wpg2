@@ -489,7 +489,7 @@ function wpg2_lightboxheader() {
 
 	// Add BTEV Event Message
 	if (function_exists('btev_trigger_error')) {
-		btev_trigger_error('WPG2 ADD '.$$wpg2_option['wpg2_effectscript'].' TO WP HEADER', E_USER_NOTICE, __FILE__);
+		btev_trigger_error('WPG2 ADD '.${$wpg2_option['wpg2_effectscript']}.' TO WP HEADER', E_USER_NOTICE, __FILE__);
 	}
 
 }
