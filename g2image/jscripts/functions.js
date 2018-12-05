@@ -1,6 +1,6 @@
 /*
     Gallery 2 Image Chooser
-    Version 3.0.2 - updated 01 OCT 2007
+    Version 3.0.3 - updated 13 MAY 2008
     Documentation: http://g2image.steffensenfamily.com/
 
     Author: Kirk Steffensen with inspiration, code snipets,
@@ -149,13 +149,18 @@ function insertHtml(html,form) {
 	g2ic_form=form.g2ic_form.value;
 	g2ic_field=form.g2ic_field.value;
 
-	if(window.tinyMCE)
-		window.opener.tinyMCE.execCommand("mceInsertContent",true,html);
-	else if (window.opener.FCK)
+	if(window.tinyMCE) {
+		tinyMCE.execCommand("mceInsertContent",true,html);
+		tinyMCEPopup.close();
+	}
+	else if (window.opener.FCK) {
 		window.opener.FCK.InsertHtml(html);
-	else
+		window.close();
+	}
+	else {
 		insertAtCursor(window.opener.document.forms[g2ic_form].elements[g2ic_field],html);
-	window.close();
+		window.close();
+	}
 }
 
 function insertItems(){
@@ -332,7 +337,7 @@ function insertItems(){
 						if (obj.wpg2_tag_size.value)
 							htmlCode += '|' + obj.wpg2_tag_size.value;
 						htmlCode += '" ' + thumbw[i] + thumbh[i]
-						+ 'id="mce_plugin_g2image_wpg2" />';
+						+ 'class="mceItem" id="mce_plugin_g2image_wpg2" />';
 					}
 					else {
 						htmlCode += '<wpg2>' + image_id[i];
@@ -381,7 +386,7 @@ function insertWpg2Tag(){
 		+ '" alt="' + obj.wpg2_id.value
 		+ '" title="' + obj.wpg2_id.value
 		+ '" width="' + obj.wpg2_thumbw.value + '" height="' + obj.wpg2_thumbh.value
-		+ '" id="mce_plugin_g2image_wpg2" />';
+		+ '" class="mceItem" id="mce_plugin_g2image_wpg2" />';
 	}
 	else {
 		htmlCode += '<wpg2>' + obj.wpg2_id.value + '</wpg2>';

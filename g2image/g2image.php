@@ -1,7 +1,7 @@
 <?php
 /*
     Gallery 2 Image Chooser
-    Version 3.0.2 - updated 01 OCT 2007
+    Version 3.0.3 - updated 13 MAY 2008
     Documentation: http://g2image.steffensenfamily.com/
 
     Author: Kirk Steffensen with inspiration, code snipets,
@@ -15,8 +15,8 @@
 */
 
 // ====( Version Info )
-$g2ic_version_text = '3.0.2';
-$g2ic_version_array = array(3,0,2);
+$g2ic_version_text = '3.0.3';
+$g2ic_version_array = array(3,0,3);
 
 // ====( Initialization Code )
 require_once('init.php');
@@ -427,6 +427,7 @@ function g2ic_make_html_album_tree_branches($current_album, $parent, &$node) {
 	if(!$error){
 		foreach ($items as $item) {
 			$album_title = $item->getTitle();
+			$album_title = preg_replace("/(\n|\r)/"," ",$album_title); // Bug #44
 			if(empty($album_title)) {
 				$album_title = $item->getPathComponent();
 			}
@@ -757,7 +758,7 @@ function g2ic_make_html_header(){
 	. '    <title>' . T_('Gallery2 Image Chooser') . '</title>' . "\n"
 	. '    <link rel="stylesheet" href="css/g2image.css" type="text/css" />' . "\n"
 	. '    <link rel="stylesheet" href="css/dtree.css" type="text/css" />' . "\n"
-	. '    <link rel="stylesheet" href="css/lightbox.css" type="text/css" />' . "\n"
+	. '    <link rel="stylesheet" href="css/slimbox.css" type="text/css" />' . "\n"
 	. '    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />' . "\n";
 	if($g2ic_options['tinymce'] && $g2ic_options['wpg2_valid']) {
 		$html .= "    <script language='javascript' type='text/javascript' src='../../../../wp-includes/js/tinymce/tiny_mce_popup.js'></script>\n";
@@ -767,9 +768,8 @@ function g2ic_make_html_header(){
 	}
 	$html .= '    <script language="javascript" type="text/javascript" src="jscripts/functions.js"></script>' . "\n"
 	. '    <script language="javascript" type="text/javascript" src="jscripts/dtree.js"></script>' . "\n"
-	. '    <script language="javascript" type="text/javascript" src="jscripts/prototype.js"></script>' . "\n"
-	. '    <script language="javascript" type="text/javascript" src="jscripts/scriptaculous.js?load=effects"></script>' . "\n"
-	. '    <script language="javascript" type="text/javascript" src="jscripts/lightbox.js"></script>' . "\n"
+	. '    <script language="javascript" type="text/javascript" src="jscripts/mootools.js"></script>' . "\n"
+	. '    <script language="javascript" type="text/javascript" src="jscripts/slimbox.js"></script>' . "\n"
 	. '</head>' . "\n\n"
 	. '<body id="g2image">' . "\n\n"
 	. '    <form method="post">' . "\n";

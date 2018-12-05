@@ -1,8 +1,8 @@
 <?xml version="1.0" ?>
-<mosinstall version="1.1.0" type="jceplugin" plugin="g2image">
+<install version="1.5.0" type="plugin" plugin="g2image">
     <name>Gallery2 Image Chooser</name>
-    <version>3.0.2</version>
-    <creationDate>10/01/2007</creationDate>
+    <version>3.0.3</version>
+    <creationDate>05/13/2008</creationDate>
     <author>Kirk Steffensen</author>
     <authorEmail>blogger (at sign) steffensenfamily (dot) com</authorEmail>
     <authorUrl>http://g2image.steffensenfamily.com/</authorUrl>
@@ -10,17 +10,15 @@
     <license>GPL</license>
     <description>Gallery2 Image Chooser plugin for JCE</description>
     <icon>g2image</icon>
-    <layout_icon>g2image</layout_icon>
+    <layout>g2image</layout>
     <elements></elements>
     <files>
-        <filename plugin="g2image">editor_plugin.js</filename>
+        <filename>editor_plugin.js</filename>
         <filename>CHANGELOG.HTML</filename>
         <filename>config.php</filename>
         <filename>CREDITS.HTML</filename>
-        <filename>editor_plugin.js</filename>
         <filename>editor_plugin_src.js</filename>
         <filename>g2image.php</filename>
-        <filename>g2image.xml</filename>
         <filename>gettext.inc</filename>
         <filename>gettext.php</filename>
         <filename>init.php</filename>
@@ -45,6 +43,7 @@
         <filename>img/empty.gif</filename>
         <filename>img/folder.gif</filename>
         <filename>img/folderopen.gif</filename>
+        <filename>img/g2image.gif</filename>
         <filename>img/join.gif</filename>
         <filename>img/joinbottom.gif</filename>
         <filename>img/line.gif</filename>
@@ -56,12 +55,9 @@
         <filename>img/plus.gif</filename>
         <filename>img/plusbottom.gif</filename>
         <filename>jscripts/dtree.js</filename>
-        <filename>jscripts/effects.js</filename>
         <filename>jscripts/functions.js</filename>
-        <filename>jscripts/lightbox.js</filename>
-        <filename>jscripts/popup.js</filename>
-        <filename>jscripts/prototype.js</filename>
-        <filename>jscripts/scriptaculous.js</filename>
+        <filename>jscripts/mootools.js</filename>
+        <filename>jscripts/slimbox.js</filename>
         <filename>langs/de.js</filename>
         <filename>langs/de.mo</filename>
         <filename>langs/en.js</filename>
@@ -85,4 +81,6 @@
         <filename>langs/zh_TW.mo</filename>
     </files>
     <params></params>
-</mosinstall>
+    <languages></languages>
+    <help></help>
+</install>
