@@ -46,7 +46,7 @@ function wpg2_addwpmenus() {
 			add_submenu_page(__FILE__, 'G2IMAGE Options - Manage Options', __('G2Image', 'wpg2'), 'manage_options', 'g2imageoptions', 'g2imageoptions' );
 		}
 
-		if ($wpg2_option['g2_validated'] == "Yes" && current_user_can('edit_users')) {
+		if (isset($wpg2_option['g2_validated']) == "Yes" && current_user_can('edit_users')) {
 			add_submenu_page('profile.php', 'WPG2 Gallery2 Users - Manage Users', __('Gallery2 Users', 'wpg2'), 'edit_users', 'wpg2/wpg2usersadmin.php' );
 		}
 	}
@@ -117,16 +117,7 @@ function wpg2_wppagecreate($wpg2_pagetitle='WPG2',$wpg2_pagename='wpg2') {
 	global $user_ID;
 
 	// Create New Gallery2 Output Page
-	$wpg2_createdpageid = wp_insert_post(array(
-				'post_author'		=> $user_ID,
-				'post_title'		=> $wpg2_pagetitle,
-				'post_name'		 	=> $wpg2_pagename,
-				'post_status'		=> "publish",
-				'post_type'         => "page",
-				'comment_status'	=> "closed",
-				'ping_status'		=> " ",
-				'post_content'      => "WPG2 Internal Page used for displaying your Gallery2 Content.<br /><br />You can customise this page by changing the Page Title, Page Slug or altering the options in the WPG2 Output Tab.."
-			));
+	$wpg2_createdpageid = wp_insert_post(['post_author'		=> $user_ID, 'post_title'		=> $wpg2_pagetitle, 'post_name'		 	=> $wpg2_pagename, 'post_status'		=> "publish", 'post_type'         => "page", 'comment_status'	=> "closed", 'ping_status'		=> " ", 'post_content'      => "WPG2 Internal Page used for displaying your Gallery2 Content.<br /><br />You can customise this page by changing the Page Title, Page Slug or altering the options in the WPG2 Output Tab.."]);
 
 	// Add BTEV Event Message
 	if (function_exists('btev_trigger_error')) {
@@ -147,17 +138,7 @@ function wpg2_wppageupdate($wpg2_pageid,$wpg2_pagetitle,$wpg2_pagename) {
 
 	global $user_ID;
 
-	wp_insert_post(array(
-				'ID'			=> $wpg2_pageid,
-				'post_title'		=> $wpg2_pagetitle,
-				'post_name'			=> $wpg2_pagename,
-				'post_author'		=> $user_ID,
-				'post_status'		=> "publish",
-				'post_type'			=> "page",
-				'comment_status'	=> "closed",
-				'ping_status'		=> " ",
-				'post_content'      => "WPG2 Internal Page used for displaying your Gallery2 Content.<br /><br />You can customise this page by changing the Page Title, Page Slug or altering the options in the WPG2 Output Tab.."
-			));
+	wp_insert_post(['ID'			=> $wpg2_pageid, 'post_title'		=> $wpg2_pagetitle, 'post_name'			=> $wpg2_pagename, 'post_author'		=> $user_ID, 'post_status'		=> "publish", 'post_type'			=> "page", 'comment_status'	=> "closed", 'ping_status'		=> " ", 'post_content'      => "WPG2 Internal Page used for displaying your Gallery2 Content.<br /><br />You can customise this page by changing the Page Title, Page Slug or altering the options in the WPG2 Output Tab.."]);
 
 	// Add BTEV Event Message
 	if (function_exists('btev_trigger_error')) {
@@ -237,11 +218,11 @@ function wpg2_trimpermalinkrules() {
 
 	if (!empty($permalink_structure) || !empty($category_base) ) {
 		if (!empty($permalink_structure)) {
-			$permalink_structure = rtrim ($permalink_structure, "/");
+			$permalink_structure = rtrim ((string) $permalink_structure, "/");
 			$wp_rewrite->set_permalink_structure($permalink_structure);
 		}
 	if (!empty($category_base)) {
-		$category_base = rtrim ($category_base, "/");
+		$category_base = rtrim ((string) $category_base, "/");
 		$wp_rewrite->set_category_base($category_base);
 		}
 	}
@@ -323,7 +304,7 @@ function wpg2_template_rewritechanges($wpg2isinternal=null) {
 	// Get WPG2 Options
 	$wpg2_option = get_option('wpg2_options');
 
-	if ( strstr( $_SERVER['PHP_SELF'], "options-permalink.php") && ($_POST) || $wpg2isinternal || strstr( $_SERVER['PHP_SELF'], "options-general.php") && ($_GET) ) {
+	if ( strstr( (string) $_SERVER['PHP_SELF'], "options-permalink.php") && ($_POST) || $wpg2isinternal || strstr( (string) $_SERVER['PHP_SELF'], "options-general.php") && ($_GET) ) {
 
 		// Add BTEV Event Message
 		if (function_exists('btev_trigger_error')) {
@@ -342,7 +323,7 @@ function wpg2_template_rewritechanges($wpg2isinternal=null) {
 				}
 			}
 			// Deactivate Rewrite Module as Wordpress Permalink Array will be wrong.
-			list ($ret, $ignored) = GalleryCoreApi::deactivatePlugin('module', 'rewrite');
+			[$ret, $ignored] = GalleryCoreApi::deactivatePlugin('module', 'rewrite');
 
 			// Add BTEV Event Message
 			if (function_exists('btev_trigger_error')) {
@@ -353,7 +334,7 @@ function wpg2_template_rewritechanges($wpg2isinternal=null) {
 			GalleryEmbed::done();
 
 		} else {
-			if (  strstr( $_SERVER['PHP_SELF'], "options-general.php") && ($_GET) ) {
+			if (  strstr( (string) $_SERVER['PHP_SELF'], "options-general.php") && ($_GET) ) {
 				// Reset Path to WPG2 Output back to Safe Option
 				 wpg2_template_page();
 
@@ -386,17 +367,17 @@ function wpg2_template_rules($wprules) {
 		$wpg2_g2path = get_option('wpg2_g2paths');
 		$siteUrl = get_option('home');
 
-		list ($ret, $activeRules) = GalleryCoreApi::getPluginParameter('module', 'rewrite', 'activeRules');
+		[$ret, $activeRules] = GalleryCoreApi::getPluginParameter('module', 'rewrite', 'activeRules');
 		if (!$ret) {
 			$activeRules = unserialize($activeRules);
 
 			GalleryCoreApi::requireOnce('modules/rewrite/classes/RewriteHelper.class');
-			$regexRules = array();
-			$shortUrls = array();
-			list ($ret, $parser) = RewriteHelper::getRewriteParser();
+			$regexRules = [];
+			$shortUrls = [];
+			[$ret, $parser] = RewriteHelper::getRewriteParser();
 			if (!$ret) {
 				if (!empty($activeRules)) {
-					list ($ret, $code, $regexRules, $shortUrls, $errorId) =
+					[$ret, $code, $regexRules, $shortUrls, $errorId] =
 					RewriteHelper::parseActiveRules($activeRules, $parser);
 					if ($ret) {
 						die;
@@ -426,13 +407,13 @@ function wpg2_template_rules($wprules) {
 			}
 			foreach ($regexRules as $rule) {
 				$wpg2rewriterule = $rule['pattern'];
-				if (strlen($wpg2rewriterule) > 0) {
+				if (strlen((string) $wpg2rewriterule) > 0) {
 					if ($wpDirectory != '/') {
-						$newrules[$wpg2rewriterule] = preg_replace($wpDirectory,'',$rule['substitution']);
+						$newrules[$wpg2rewriterule] = preg_replace($wpDirectory,'',(string) $rule['substitution']);
 						$newrules[$wpg2rewriterule] = preg_replace('/\/\//','',$newrules[$wpg2rewriterule]);
 					}
 					else {
-						$newrules[$wpg2rewriterule] = preg_replace('/^\//','',$rule['substitution']);
+						$newrules[$wpg2rewriterule] = preg_replace('/^\//','',(string) $rule['substitution']);
 					}
 				}
 				// Add BTEV Event Message
@@ -503,7 +484,7 @@ function wpg2_lightboxheader() {
 */
 function wpg2_adminjsheader() {
 
-	if ( strstr( $_SERVER['PHP_SELF'], "admin.php")) {
+	if ( strstr( (string) $_SERVER['PHP_SELF'], "admin.php")) {
 		$wpg2help = get_bloginfo('wpurl').'/wp-content/plugins/wpg2/js/helpwindow.js';
 		echo '<script type="text/javascript" src="'.$wpg2help.'"></script>';
 	}
@@ -549,9 +530,9 @@ function g2_addheader() {
 		echo '<script language="javascript" type="text/javascript" src="'.get_bloginfo('wpurl').'/wp-content/plugins/wpg2/js/dtree.js"></script>'."\n";
 		// Add Gallery2 CSS For Frames Into WP Header for (Pure WP Pages Only)
 		$site_url = trailingslashit(get_option('siteurl'));
-		$framenames = array('none');
+		$framenames = ['none'];
 		$cssoutput = '<link rel="stylesheet" type="text/css" href="'.$wpg2_g2path['g2_url'].'main.php?g2_view=imageframe.CSS&amp;g2_frames=';
-		$frameoptions = array('wpg2_sidebargridblocksimageframe','g2_sidebarblockimageframe','g2_sidebarblockalbumframe','g2_tagalbumframe','g2_tagimageframe');
+		$frameoptions = ['wpg2_sidebargridblocksimageframe', 'g2_sidebarblockimageframe', 'g2_sidebarblockalbumframe', 'g2_tagalbumframe', 'g2_tagimageframe'];
 		foreach($frameoptions as $frameoption) {
 			$framename = $wpg2_option[$frameoption];
 			if($framename && !in_array($framename, $framenames)) {
@@ -570,7 +551,7 @@ function g2_addheader() {
 	} else {
 		// Merge Gallery2 HEAD Outputs Into WP Header 
 		if (isset($g2data['headHtml'])) {
-			list($g2_title, $g2_css, $g2_javascript) = GalleryEmbed::parseHead($g2data['headHtml']);
+			[$g2_title, $g2_css, $g2_javascript] = GalleryEmbed::parseHead($g2data['headHtml']);
 			foreach ($g2_css as $wpg2_css) { echo "$wpg2_css \r\n"; }
 			foreach ($g2_javascript as $wpg2_javascript) { echo "$wpg2_javascript \r\n"; }
 		}
@@ -599,12 +580,12 @@ function g2_outputpagetitle() {
 	}
 
 	global $g2data, $wpg2_wptitle;
-	list($g2_title, $g2_css, $g2_javascript) = GalleryEmbed::parseHead($g2data['headHtml']);
+	[$g2_title, $g2_css, $g2_javascript] = GalleryEmbed::parseHead($g2data['headHtml']);
 		
 	// Set WP Title
 	$site_name = get_option('blogname');
 	$page_name = wp_title(false, false);
-	$page_name = ltrim($page_name);
+	$page_name = ltrim((string) $page_name);
 
 // Add Gallery2 Page to Page Title	
 		if ($page_name == $g2_title)
@@ -664,7 +645,7 @@ function wpg2_simple_find_paths() {
 		$ret = wpg2_validateg2url($g2url,$wpg2relpath);
 	}
 	if ($ret) {
-		$domain_url = rtrim($site_url, '/');
+		$domain_url = rtrim((string) $site_url, '/');
 		$domain_url_subset = strlen($domain_url) - strpos(strrev($domain_url), '/');
 		$domain_url = substr($domain_url,0,$domain_url_subset);
 		$g2url = $domain_url."gallery2";
@@ -682,7 +663,7 @@ function wpg2_simple_find_paths() {
 	if ($ret) {
 
 		// Get Plugin Base
-		$wpg2base = dirname(__FILE__) . '/';
+		$wpg2base = __DIR__ . '/';
 		require_once($wpg2base . 'g2embeddiscoveryutilities.class');
 		
 		// Set up the URL's and Paths
@@ -698,7 +679,7 @@ function wpg2_simple_find_paths() {
 		$wpg2_g2path['g2_url'] = '';
 		$wpg2_g2path['g2_filepath'] = '';
 		$wpg2_g2path['g2_embeduri'] = '';
-		$wpg2_g2path['wpg2_relativepath'] = '..'.DIRECTORY_SEPARATOR.dirname(__FILE__); ; 
+		$wpg2_g2path['wpg2_relativepath'] = '..'.DIRECTORY_SEPARATOR.__DIR__; ; 
 		$wpg2_g2path['g2_errorredirect'] = get_option( 'home' );
 		$wpg2_g2path['g2_errorredirect'] .= "/wp-login.php";
 		update_option('wpg2_g2paths', $wpg2_g2path);
@@ -779,7 +760,7 @@ function wpg2_pluginactivate() {
 
 	// WPG2 Tag Defaults
 	$wpg2_option['g2_tagimgsize'] = '150';
-	$wpg2_option['g2_tagblockshow'] = array(1);
+	$wpg2_option['g2_tagblockshow'] = [1];
 	$wpg2_option['g2_tagalbumframe'] = 'None';
 	$wpg2_option['g2_tagimageframe'] = 'None';
 
@@ -987,7 +968,7 @@ if ( ! function_exists('wp_check_password') ):
 	function wp_check_password($password, $hash, $user_id = '') {
 		// If the hash was updated to the new hash before this plugin
 		// was installed, rehash as md5.
-		if ( strlen($hash) > 32 ) {
+		if ( strlen((string) $hash) > 32 ) {
 			global $wp_hasher;
 			if ( empty($wp_hasher) ) {
 				require_once( ABSPATH . 'wp-includes/class-phpass.php');
@@ -1004,7 +985,7 @@ if ( ! function_exists('wp_check_password') ):
 			return apply_filters('check_password', $check, $password, $hash, $user_id);
 		}
 
-		$check = ( $hash == md5($password) );
+		$check = ( $hash == md5((string) $password) );
 
 		return apply_filters('check_password', $check, $password, $hash, $user_id);
 	}
@@ -1012,7 +993,7 @@ endif;
 
 if ( !function_exists('wp_hash_password') ):
 	function wp_hash_password($password) {
-		return md5($password);
+		return md5((string) $password);
 	}
 endif;
 

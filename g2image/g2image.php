@@ -16,13 +16,13 @@
 
 // ====( Version Info )
 $g2ic_version_text = '3.0.3';
-$g2ic_version_array = array(3,0,3);
+$g2ic_version_array = [3, 0, 3];
 
 // ====( Initialization Code )
 require_once('init.php');
 session_start();
 g2ic_get_request_and_session_options();
-list($g2ic_album_info, $g2ic_gallery_items) = g2ic_get_gallery_items();
+[$g2ic_album_info, $g2ic_gallery_items] = g2ic_get_gallery_items();
 $g2ic_imginsert_options = g2ic_get_imginsert_selectoptions();
 
 // ====( Main HTML Generation Code )
@@ -78,25 +78,25 @@ GalleryEmbed::done();
 function g2ic_get_gallery_items() {
 	GLOBAL $gallery, $g2ic_options;
 
-	$gallery_items = array();
-	$item_mod_times = array();
-	$item_orig_times = array();
-	$item_create_times = array();
-	$item_titles = array();
-	$item_ids = array();
-	$album_info = array();
+	$gallery_items = [];
+	$item_mod_times = [];
+	$item_orig_times = [];
+	$item_create_times = [];
+	$item_titles = [];
+	$item_ids = [];
+	$album_info = [];
 
 	$urlGenerator =& $gallery->getUrlGenerator();
 
-	list ($error,$albums) = GalleryCoreApi::loadEntitiesById(array($g2ic_options['current_album']));
+	[$error, $albums] = GalleryCoreApi::loadEntitiesById([$g2ic_options['current_album']]);
 	if(!$error) {
 		foreach ($albums as $album) {
-			$album_info['url'] = $urlGenerator->generateUrl(array('view' => 'core.ShowItem', 'itemId' => $album->getid()), array('forceFullUrl' => true));
+			$album_info['url'] = $urlGenerator->generateUrl(['view' => 'core.ShowItem', 'itemId' => $album->getid()], ['forceFullUrl' => true]);
 			$album_info['title'] = $album->getTitle();
-			list($error, $data_item_ids) = GalleryCoreApi::fetchChildDataItemIds($album);
+			[$error, $data_item_ids] = GalleryCoreApi::fetchChildDataItemIds($album);
 			foreach ($data_item_ids as $data_item_id) {
 				$item_ids[] = $data_item_id;
-				list($error, $items) = GalleryCoreApi::loadEntitiesById(array($data_item_id));
+				[$error, $items] = GalleryCoreApi::loadEntitiesById([$data_item_id]);
 				foreach ($items as $item) {
 					$item_titles[] = $item->getTitle();
 					$item_mod_times[] = $item->getModificationTimestamp( );
@@ -134,11 +134,11 @@ function g2ic_get_gallery_items() {
 				array_multisort($item_mod_times, SORT_DESC, $item_titles, $item_ids);
 		}
 		for($i=0; $i<$count_files; $i++) {
-			$gallery_items[$i] = array('title'=>$item_titles[$i],'id'=>$item_ids[$i]);
+			$gallery_items[$i] = ['title'=>$item_titles[$i], 'id'=>$item_ids[$i]];
 		}
 	}
 
-	return array($album_info, $gallery_items);
+	return [$album_info, $gallery_items];
 
 }
 
@@ -150,8 +150,8 @@ function g2ic_get_gallery_items() {
 function g2ic_get_imginsert_selectoptions(){
 	GLOBAL $g2ic_options;
 
-	$message = array();
-	$imginsert_selectoptions = array();
+	$message = [];
+	$imginsert_selectoptions = [];
 
 	// These are the universal image insertion options
 	$message['thumbnail_image'] = T_('Thumbnail with link to image');
@@ -176,38 +176,13 @@ function g2ic_get_imginsert_selectoptions(){
 	$message['drupal_g2_filter'] = T_('Drupal Gallery2 Module filter tag');
 
 	// Make the universal message array
-	$imginsert_selectoptions = array(
-		'thumbnail_image' => array(
-			'text'  => $message['thumbnail_image'] ),
-		'thumbnail_album' => array(
-			'text'  => $message['thumbnail_album'] ),
-		'thumbnail_lightbox' => array(
-			'text'  => $message['thumbnail_lightbox'] ),
-		'thumbnail_custom_url' => array(
-			'text'  => $message['thumbnail_custom_url'] ),
-		'thumbnail_only' => array(
-			'text'  => $message['thumbnail_only'] ),
-		'fullsize_image' => array(
-			'text'  => $message['fullsize_image'] ),
-		'fullsize_only' => array(
-			'text'  => $message['fullsize_only'] ),
-		'link_image' => array(
-			'text'  => $message['link_image'] ),
-		'link_album'  => array(
-			'text'  => $message['link_album'] ),
-	);
+	$imginsert_selectoptions = ['thumbnail_image' => ['text'  => $message['thumbnail_image']], 'thumbnail_album' => ['text'  => $message['thumbnail_album']], 'thumbnail_lightbox' => ['text'  => $message['thumbnail_lightbox']], 'thumbnail_custom_url' => ['text'  => $message['thumbnail_custom_url']], 'thumbnail_only' => ['text'  => $message['thumbnail_only']], 'fullsize_image' => ['text'  => $message['fullsize_image']], 'fullsize_only' => ['text'  => $message['fullsize_only']], 'link_image' => ['text'  => $message['link_image']], 'link_album'  => ['text'  => $message['link_album']]];
 	// If using the WPG2 or Drupal Gallery Module append their array to the beginning of the universal array
 	if ($g2ic_options['wpg2_valid']) {
-		$imginsert_selectoptions = array(
-			'wpg2_image' => array(
-				'text'  => $message['wpg2_image'] ),
-		) + $imginsert_selectoptions;
+		$imginsert_selectoptions = ['wpg2_image' => ['text'  => $message['wpg2_image']]] + $imginsert_selectoptions;
 	}
 	if($g2ic_options['drupal_g2_filter'])	{
-		$imginsert_selectoptions = array(
-			'drupal_g2_filter' => array(
-				'text' => $message['drupal_g2_filter'] ),
-		) + $imginsert_selectoptions;
+		$imginsert_selectoptions = ['drupal_g2_filter' => ['text' => $message['drupal_g2_filter']]] + $imginsert_selectoptions;
 	}
 
 	$imginsert_selectoptions[$g2ic_options['default_action']]['selected'] = TRUE;
@@ -225,19 +200,19 @@ function g2ic_get_item_info($item_id) {
 
 	$urlGenerator =& $gallery->getUrlGenerator();
 
-	list ($error,$items) = GalleryCoreApi::loadEntitiesById(array($item_id));
+	[$error, $items] = GalleryCoreApi::loadEntitiesById([$item_id]);
 	if(!$error) {
 		foreach ($items as $item) {
 			$item_info['id'] = $item_id;
 			$item_info['title'] = $item->getTitle();
 			$item_info['description'] = $item->getDescription();
 			$item_info['summary'] = $item->getSummary();
-			$item_info['fullsize_img'] = $urlGenerator->generateUrl(array('view' => 'core.DownloadItem', 'itemId' => $item->getid()), array('forceFullUrl' => true));
-			list($error, $thumbnails) = GalleryCoreApi::fetchThumbnailsByItemIds(array($item->getid()));
+			$item_info['fullsize_img'] = $urlGenerator->generateUrl(['view' => 'core.DownloadItem', 'itemId' => $item->getid()], ['forceFullUrl' => true]);
+			[$error, $thumbnails] = GalleryCoreApi::fetchThumbnailsByItemIds([$item->getid()]);
 			if(!$error) {
 				foreach($thumbnails as $thumbnail) {
-					$item_info['thumbnail_src'] = $urlGenerator->generateUrl(array('view' => 'core.DownloadItem', 'itemId' => $thumbnail->getid()), array('forceFullUrl' => true));
-					$item_info['image_url'] = $urlGenerator->generateUrl(array('view' => 'core.ShowItem', 'itemId' => $item->getid()), array('forceFullUrl' => true));
+					$item_info['thumbnail_src'] = $urlGenerator->generateUrl(['view' => 'core.DownloadItem', 'itemId' => $thumbnail->getid()], ['forceFullUrl' => true]);
+					$item_info['image_url'] = $urlGenerator->generateUrl(['view' => 'core.ShowItem', 'itemId' => $item->getid()], ['forceFullUrl' => true]);
 					$item_info['thumbnail_width'] = $thumbnail->getWidth();
 					$item_info['thumbnail_height'] = $thumbnail->getHeight();
 				}
@@ -269,12 +244,12 @@ function g2ic_get_request_and_session_options(){
 	// Get the root album
 
 	// Check for G2 Core API >= 7.5.  getDefaultAlbumId only available at 7.5 or above
-	if (GalleryUtilities::isCompatibleWithApi(array(7,5), GalleryCoreApi::getApiVersion())) {
-		list($error, $g2ic_options['root_album']) = GalleryCoreApi::getDefaultAlbumId();
+	if (GalleryUtilities::isCompatibleWithApi([7, 5], GalleryCoreApi::getApiVersion())) {
+		[$error, $g2ic_options['root_album']] = GalleryCoreApi::getDefaultAlbumId();
 	}
 	// Otherwise use a Gallery2 2.1 method to get the root album
 	else {
-		list($error, $g2ic_options['root_album']) = GalleryCoreApi::getPluginParameter('module', 'core', 'id.rootAlbum');
+		[$error, $g2ic_options['root_album']] = GalleryCoreApi::getPluginParameter('module', 'core', 'id.rootAlbum');
 	}
 
 	g2ic_magic_quotes_remove($_REQUEST);
@@ -352,13 +327,14 @@ function g2ic_get_request_and_session_options(){
  * @param array &$array POST or GET with magic quotes
  */
 function g2ic_magic_quotes_remove(&$array) {
-	if(!get_magic_quotes_gpc())
+	global $get_magic_quotes_gpc;
+	if($get_magic_quotes_gpc !== null)
 		return;
 	foreach($array as $key => $elem) {
 		if(is_array($elem))
 			g2ic_magic_quotes_remove($elem);
 		else
-			$array[$key] = stripslashes($elem);
+			$array[$key] = stripslashes((string) $elem);
 	}
 }
 
@@ -423,11 +399,11 @@ function g2ic_make_html_album_tree($root_album){
 function g2ic_make_html_album_tree_branches($current_album, $parent, &$node) {
 	global $g2ic_options;
 
-	list ($error,$items) = GalleryCoreApi::loadEntitiesById(array($current_album));
+	[$error, $items] = GalleryCoreApi::loadEntitiesById([$current_album]);
 	if(!$error){
 		foreach ($items as $item) {
 			$album_title = $item->getTitle();
-			$album_title = preg_replace("/(\n|\r)/"," ",$album_title); // Bug #44
+			$album_title = preg_replace("/(\n|\r)/"," ",(string) $album_title); // Bug #44
 			if(empty($album_title)) {
 				$album_title = $item->getPathComponent();
 			}
@@ -437,7 +413,7 @@ function g2ic_make_html_album_tree_branches($current_album, $parent, &$node) {
 		. '&images_per_page=' . $g2ic_options['images_per_page'] . '");' . "\n";
 	}
 
-	list($error, $sub_albums) = GalleryCoreApi::fetchAlbumTree($current_album,1);
+	[$error, $sub_albums] = GalleryCoreApi::fetchAlbumTree($current_album,1);
 
 	$albums = array_keys($sub_albums);
 
@@ -461,26 +437,22 @@ function g2ic_make_html_alignment_select(){
 	GLOBAL $g2ic_options;
 
 	// array for output
-	$align_options = array('none' => array('text' => T_('None')),
-		'g2image_normal' => array('text' => T_('Normal')),
-		'g2image_float_left' => array('text' => T_('Float Left')),
-		'g2image_float_right' => array('text' => T_('Float Right')),
-		'g2image_centered' => array('text' => T_('Centered')));
+	$align_options = ['none' => ['text' => T_('None')], 'g2image_normal' => ['text' => T_('Normal')], 'g2image_float_left' => ['text' => T_('Float Left')], 'g2image_float_right' => ['text' => T_('Float Right')], 'g2image_centered' => ['text' => T_('Centered')]];
 
 	if ($g2ic_options['custom_class_1'] != 'not_used'){
-		$align_options = array_merge($align_options, array($g2ic_options['custom_class_1'] => array('text' => $g2ic_options['custom_class_1'])));
+		$align_options = array_merge($align_options, [$g2ic_options['custom_class_1'] => ['text' => $g2ic_options['custom_class_1']]]);
 	}
 
 	if ($g2ic_options['custom_class_2'] != 'not_used'){
-		$align_options = array_merge($align_options, array($g2ic_options['custom_class_2'] => array('text' => $g2ic_options['custom_class_2'])));
+		$align_options = array_merge($align_options, [$g2ic_options['custom_class_2'] => ['text' => $g2ic_options['custom_class_2']]]);
 	}
 
 	if ($g2ic_options['custom_class_3'] != 'not_used'){
-		$align_options = array_merge($align_options, array($g2ic_options['custom_class_3'] => array('text' => $g2ic_options['custom_class_3'])));
+		$align_options = array_merge($align_options, [$g2ic_options['custom_class_3'] => ['text' => $g2ic_options['custom_class_3']]]);
 	}
 
 	if ($g2ic_options['custom_class_4'] != 'not_used'){
-		$align_options = array_merge($align_options, array($g2ic_options['custom_class_4'] => array('text' => $g2ic_options['custom_class_4'])));
+		$align_options = array_merge($align_options, [$g2ic_options['custom_class_4'] => ['text' => $g2ic_options['custom_class_4']]]);
 	}
 
 	$align_options[$g2ic_options['default_alignment']]['selected'] = TRUE;
@@ -634,7 +606,7 @@ function g2ic_make_html_controls(){
 function g2ic_make_html_display_options(){
 	global $g2ic_options;
 
-	$images_per_page_options = array(10,20,30,40,50,60,9999);
+	$images_per_page_options = [10, 20, 30, 40, 50, 60, 9999];
 
 	if (!in_array($g2ic_options['images_per_page'],$images_per_page_options)){
 		array_push($images_per_page_options,$g2ic_options['images_per_page']);
@@ -642,12 +614,7 @@ function g2ic_make_html_display_options(){
 	}
 
 	// array for output
-	$sortoptions = array('title_asc' => array('text' => T_('Gallery2 Title (A-z)')),
-		'title_desc' => array('text' => T_('Gallery2 Title (z-A)')),
-		'orig_time_desc' => array('text' => T_('Origination Time (Newest First)')),
-		'orig_time_asc' => array('text' => T_('Origination Time (Oldest First)')),
-		'mtime_desc' => array('text' => T_('Last Modification (Newest First)')),
-		'mtime_asc' => array('text' => T_('Last Modification (Oldest First)')));
+	$sortoptions = ['title_asc' => ['text' => T_('Gallery2 Title (A-z)')], 'title_desc' => ['text' => T_('Gallery2 Title (z-A)')], 'orig_time_desc' => ['text' => T_('Origination Time (Newest First)')], 'orig_time_asc' => ['text' => T_('Origination Time (Oldest First)')], 'mtime_desc' => ['text' => T_('Last Modification (Newest First)')], 'mtime_asc' => ['text' => T_('Last Modification (Oldest First)')]];
 
 	$sortoptions[$g2ic_options['sortby']]['selected'] = TRUE;
 
@@ -814,9 +781,9 @@ function g2ic_make_html_image_navigation(){
 		else
 			$html .= '    <div class="hidden_title">' . "\n";
 
-		$html .= '        ' . T_('Title:') . ' ' . htmlspecialchars($item_info['title']) . '<br />' . "\n"
-		. '        ' . T_('Summary:') . ' ' . htmlspecialchars($item_info['summary']) . '<br />' . "\n"
-		. '        ' . T_('Description:') . ' ' . htmlspecialchars($item_info['description']) . '<br />' . "\n";
+		$html .= '        ' . T_('Title:') . ' ' . htmlspecialchars((string) $item_info['title']) . '<br />' . "\n"
+		. '        ' . T_('Summary:') . ' ' . htmlspecialchars((string) $item_info['summary']) . '<br />' . "\n"
+		. '        ' . T_('Description:') . ' ' . htmlspecialchars((string) $item_info['description']) . '<br />' . "\n";
 
 		$html .=  "    </div>\n\n";
 
@@ -882,7 +849,7 @@ function g2ic_make_html_page_navigation() {
 	if ($g2ic_options['current_page'] > $pages)
 		$g2ic_options['current_page'] = $pages;
 
-	$pagelinks = array();
+	$pagelinks = [];
 	for ($count = 1; $count <= $pages; $count++) {
 		if ($g2ic_options['current_page'] == $count) {
 			$pagelinks[] = '        <strong>' . $count . '</strong>';

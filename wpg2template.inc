@@ -35,7 +35,7 @@ function wpg2_template() {
 			btev_trigger_error('WPG2 PAGE: '.$page_obj->ID.' TRIGGER', E_USER_NOTICE, __FILE__);
 		}
 
-		if ( $wpg2_option['g2_validated'] == "Yes" ) {
+		if (isset( $wpg2_option['g2_validated']) == "Yes" ) {
 
 			// Get Gallery2 Paths & Plugin Settings
 			$wpg2_g2path = get_option('wpg2_g2paths');
@@ -120,7 +120,7 @@ function wpg2_template() {
 				if ( $wpg2_option['g2_externalheader']!="Yes" ) {
 					get_header();
 					//Include any plug-in header content set in the plugin options
-					echo stripslashes($wpg2_option['g2_header']);
+					echo stripslashes((string) $wpg2_option['g2_header']);
 						
 				} else
 					include (TEMPLATEPATH.'/wpg2header.php');
@@ -134,7 +134,7 @@ function wpg2_template() {
 				// Should we Disable the Header output and instead allow the wpg2footer to control the Output?
 				if ($wpg2_option['g2_externalfooter']!="Yes" ) {
 					//Include plug-in footer content
-					echo stripslashes($wpg2_option['g2_footer']);
+					echo stripslashes((string) $wpg2_option['g2_footer']);
 					//Include WP footer
 				if ( file_exists( TEMPLATEPATH . '/footer.php') )
 					load_template( TEMPLATEPATH . '/footer.php');

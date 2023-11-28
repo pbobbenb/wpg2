@@ -106,7 +106,7 @@ class G2EmbedDiscoveryUtilities {
      * @param string g2Uri
      * @return string normalized g2Uri
      */
-    function normalizeG2Uri($g2Uri) {
+    static function normalizeG2Uri($g2Uri) {
 	list ($schemaAndHost, $path, $file, $queryString, $fragment) =
 	    G2EmbedDiscoveryUtilities::_normalizeUri($g2Uri);
 
@@ -318,7 +318,7 @@ class G2EmbedDiscoveryUtilities {
      * @return array boolean success, string errormessage
      */
 
-    function verifyUri($Uri) {
+    static function verifyUri($Uri) {
 	$Uri = trim($Uri);
 	if (empty($Uri)) {
 	    return array (false, "Verification Failed: the Uri is empty");
@@ -445,7 +445,7 @@ class G2EmbedDiscoveryUtilities {
 	    $host = $matches[2];
 	    $schemaAndHost = $schema . $host;
 	    $uri = empty($matches[3]) ? '/' : $matches[3];
-	    $uri = $uri{0} != '/' ? '/' . $uri : $uri;
+	    $uri = $uri[0] != '/' ? '/' . $uri : $uri;
 	} else {
 	    /* Get the host string, e.g. from www.example.com/foo or www.example.com */
 	    if (preg_match('{^((?:\w+:\w+@)?[\w\.]*\w+\.\w+(?::\d+)?)(.*)$}', $uri, $matches)) {
@@ -456,12 +456,12 @@ class G2EmbedDiscoveryUtilities {
 		}
 		$schemaAndHost = $schema . $host;;
 		$uri = empty($matches[2]) ? '/' : $matches[2];
-		$uri = $uri{0} != '/' ? '/' . $uri : $uri;
+		$uri = $uri[0] != '/' ? '/' . $uri : $uri;
 	    }
 	}
 
 	/* Add leading / trailing slash to path */
-	$path = $uri{0} != '/' ? '/' . $uri : $uri;
+	$path = $uri[0] != '/' ? '/' . $uri : $uri;
 	$path .= substr($path, -1) != '/' ? '/' : '';
 
 	return array($schemaAndHost, $path, $file, $queryString, $fragment);
@@ -525,7 +525,7 @@ class G2EmbedDiscoveryUtilities {
 	foreach (explode($separator, $openBasedir) as $baseDir) {
 	    if (($baseDirMatch = realpath($baseDir)) === false) {
 		$baseDirMatch = $baseDir;
-	    } else if ($baseDir{strlen($baseDir)-1} == $slash) {
+	    } else if ($baseDir[strlen($baseDir)-1] == $slash) {
 		/* Realpath will remove a trailing slash.. add it back to avoid prefix match */
 		$baseDirMatch .= $slash;
 	    }

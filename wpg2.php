@@ -86,7 +86,8 @@ add_action('save_post', 'wpg2_template_pagechanges');
 add_action ( 'get_header', 'g2_outputpagetitle' );
 
 // Hook into WP Templates
-if ($wpg2_option['g2_validated'] == "Yes" && $wpg2_option['g2_embedpageid'] != "" ) {
+//global $wpg2_option;
+if (isset($wpg2_option['g2_validated']) == "Yes" && $wpg2_option['g2_embedpageid'] != "" ) {
 
 // Wordpress Rewrite Hooks - Add Filter To insert additional Gallery2  Rewrite ruleset.
 	if ($wpg2_option['g2_rewriteactive'] != '') {
@@ -98,7 +99,7 @@ if ($wpg2_option['g2_validated'] == "Yes" && $wpg2_option['g2_embedpageid'] != "
 }
 
 // Activate when WPG2 is Validated
-if ( $wpg2_option['g2_validated'] == "Yes" ) {
+if (isset ( $wpg2_option['g2_validated']) == "Yes" ) {
 	// Add User Sync Functions
 	add_action('delete_user', 'g2_delete_user');
 	add_action('profile_update', 'g2_update_user');
@@ -111,7 +112,7 @@ if ( $wpg2_option['g2_validated'] == "Yes" ) {
 	add_action('wp_logout', 'g2_logout');
 
 	// Lightbox
-	if ($wpg2_option['wpg2_enablelightbox'])
+	if (isset($wpg2_option['wpg2_enablelightbox']))
 		add_action('wp_head', 'wpg2_lightboxheader');
 
 	// Add G2 Header Elements
@@ -160,7 +161,7 @@ if (function_exists('g2image_plugin')) {
 	$g2_image = get_option('g2ic');
 
 	// Activate when WPG2 is Validated
-	if ( $wpg2_option['g2_validated'] == "Yes" ) {
+	if (isset( $wpg2_option['g2_validated']) == "Yes" ) {
 
 		// Add Tags to valid MCEEditor Tags
 		add_filter('mce_valid_elements', 'g2image_wp_extended_editor_mce_valid_elements', 0);

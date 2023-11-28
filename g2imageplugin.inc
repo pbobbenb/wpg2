@@ -304,11 +304,11 @@ function g2image_callback() {
    $g2image_url = get_bloginfo('wpurl').'/wp-content/plugins/wpg2/g2image/';
 
  // Only add the javascript to post.php, post-new.php, page.php, page-new.php, or bookmarklet.php pages
-  if (strpos($_SERVER['REQUEST_URI'], 'post.php') ||
-      strpos($_SERVER['REQUEST_URI'], 'post-new.php') ||
-      strpos($_SERVER['REQUEST_URI'], 'page.php') ||
-      strpos($_SERVER['REQUEST_URI'], 'page-new.php') ||
-      strpos($_SERVER['REQUEST_URI'], 'bookmarklet.php')) {
+  if (strpos((string) $_SERVER['REQUEST_URI'], 'post.php') ||
+      strpos((string) $_SERVER['REQUEST_URI'], 'post-new.php') ||
+      strpos((string) $_SERVER['REQUEST_URI'], 'page.php') ||
+      strpos((string) $_SERVER['REQUEST_URI'], 'page-new.php') ||
+      strpos((string) $_SERVER['REQUEST_URI'], 'bookmarklet.php')) {
 
 ?>
 

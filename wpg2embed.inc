@@ -39,18 +39,11 @@ function g2_init() {
 
 	if (!defined('G2PARTINIT')) {
 		// Initialise GalleryAPI
-			$ret = GalleryEmbed::init( array(
-						'embedUri' => $wpg2_g2path['g2_embeduri'],
-						'g2Uri' => $wpg2_g2path['g2_url'],
-						'loginRedirect' => $wpg2_g2path['g2_errorredirect'],
-						'fullInit' => true)
+			$ret = GalleryEmbed::init( ['embedUri' => $wpg2_g2path['g2_embeduri'], 'g2Uri' => $wpg2_g2path['g2_url'], 'loginRedirect' => $wpg2_g2path['g2_errorredirect'], 'fullInit' => true]
 					);
 	} else {
 		// Initialise GalleryAPI
-			$ret = GalleryEmbed::init( array(
-						'embedUri' => $wpg2_g2path['g2_embeduri'],
-						'g2Uri' => $wpg2_g2path['g2_url'],
-						'loginRedirect' => $wpg2_g2path['g2_errorredirect'])
+			$ret = GalleryEmbed::init( ['embedUri' => $wpg2_g2path['g2_embeduri'], 'g2Uri' => $wpg2_g2path['g2_url'], 'loginRedirect' => $wpg2_g2path['g2_errorredirect']]
 				);
 	}
 
@@ -105,12 +98,12 @@ function g2_login() {
 //	Try to Login with Current WP User Mapping via G2 ExternalID if user has Gallery2_user
 	if ($user_ID) {
 		if ($userrole->has_cap('gallery2_user')) {
-			$ret = GalleryEmbed::isExternalIdMapped($user_ID, 'GalleryUser');
+			$ret = (new GalleryEmbed)->isExternalIdMapped($user_ID, 'GalleryUser');
 			if ($ret) {
 				g2_create_user($user_ID);
 			}
 			// Check to Ensure the Galley2 User has actually been created, this may not be the case in WP 2.5
-			$ret = GalleryEmbed::isExternalIdMapped($user_ID, 'GalleryUser');
+			$ret = (new GalleryEmbed)->isExternalIdMapped($user_ID, 'GalleryUser');
 			if (!$ret) { 	
 				$ret = GalleryEmbed::checkActiveUser($user_ID);
 				if ($ret) { // Fatal Return External ID Mapping Must be Corrupted - Remove and Retry
@@ -118,7 +111,7 @@ function g2_login() {
 					if (function_exists('btev_trigger_error')) {
 						btev_trigger_error('G2 INVALID EXTERNAL MAP TO ID:'.$user_ID, E_USER_ERROR, __FILE__);
 					}
-					$ret = GalleryCoreApi::removeMapEntry('ExternalIdMap', array('externalId' => $user_ID, 'entityType' => 'GalleryUser'));
+					$ret = GalleryCoreApi::removeMapEntry('ExternalIdMap', ['externalId' => $user_ID, 'entityType' => 'GalleryUser']);
 				} else {
 					// No Longer Guest
 					$wpg2guest = '';
@@ -162,7 +155,7 @@ function g2_login() {
 			}
 		}
 		// Set G2 SiteAdminSession (if required)		
-		list ($ret, $isAdmin) = GalleryCoreApi::isUserInSiteAdminGroup($g2user->id);
+		[$ret, $isAdmin] = GalleryCoreApi::isUserInSiteAdminGroup($g2user->id);
 		if ($isAdmin) {
 			$g2_session->put('session.siteAdminActivityTimestamp', time());
 		}
@@ -190,8 +183,7 @@ function g2_logout() {
 	if ($wpg2_g2path['g2_validated'] == "Yes" ) {
 		@include_once($g2_['g2_filepath'].'embed.php');
 
-		$ret = GalleryEmbed::logout( array(
-				'embedUri' => $wpg2_g2path['g2_embed'])
+		$ret = GalleryEmbed::logout( ['embedUri' => $wpg2_g2path['g2_embed']]
 			);
 
 	}
@@ -224,13 +216,13 @@ function g2_create_user($wpuser_id) {
     if ($usercap->has_cap('gallery2_user')) {
      // Check to Make Sure User Doesn't already have an External ID
 		$g2_mapped = null;
-		list ($ret, $g2_results) = GalleryCoreApi::getMapEntry('ExternalIdMap', array('entityId'), array('externalId' => $wpuser_id, 'entityType' => 'GalleryUser'));
+		[$ret, $g2_results] = GalleryCoreApi::getMapEntry('ExternalIdMap', ['entityId'], ['externalId' => $wpuser_id, 'entityType' => 'GalleryUser']);
 		if (!($g2_result = $g2_results->nextResult())) {
-            list ($ret, $g2user ) = GalleryCoreApi::fetchUserByUsername($usercap->user_login);
+            [$ret, $g2user] = GalleryCoreApi::fetchUserByUsername($usercap->user_login);
 //			if ($ret) // Secondary Find by Email Address
 //				list ($ret, $g2user ) = g2_fetchUserByUserEmail($usercap->user_email);	
 			if (!$ret) {
-				list ($ret, $g2_results) = GalleryCoreApi::getMapEntry('ExternalIdMap', array('entityId'), array('entityId' => $g2user->id, 'entityType' => 'GalleryUser'));
+				[$ret, $g2_results] = GalleryCoreApi::getMapEntry('ExternalIdMap', ['entityId'], ['entityId' => $g2user->id, 'entityType' => 'GalleryUser']);
 				if (!($g2_result = $g2_results->nextResult())) {
 	                GalleryEmbed::addExternalIdMapEntry($wpuser_id, $g2user->id, 'GalleryUser');
 					$g2_mapped = 1;
@@ -246,15 +238,14 @@ function g2_create_user($wpuser_id) {
 					btev_trigger_error('WPG2 COULD NOT FIND G2 USER:'.$usercap->user_login, E_USER_NOTICE, __FILE__);
 				}
 				// User has not been mapped, if WP password been hashed, then skip update.
-				if ( strlen($usercap->user_pass) > 32 ) {
+				if ( strlen((string) $usercap->user_pass) > 32 ) {
 					// Add BTEV Event Message
 					if (function_exists('btev_trigger_error')) {
 						btev_trigger_error('WPG2 G2 USER (WP:'.$wpuser_id.') COULD NOT BE CREATED DUE TO PWD HASHING', E_USER_ERROR, __FILE__);
 						$ret = '';
 					}
 				} else {
-					$ret = GalleryEmbed::createUser( $usercap->ID, array ( 'username' => $usercap->user_login, 'email' => $usercap->user_email, 'fullname' => $usercap->user_nicename,
-							'hashedpassword' => $usercap->user_pass, 'hashmethod' => 'md5'));
+					$ret = GalleryEmbed::createUser( $usercap->ID, ['username' => $usercap->user_login, 'email' => $usercap->user_email, 'fullname' => $usercap->user_nicename, 'hashedpassword' => $usercap->user_pass, 'hashmethod' => 'md5']);
 					if ($ret) {
 						echo '<h2>' . __('Fatal G2 error', 'wpg2') . '</h2> ' . __("Here's the error from G2: ", 'wpg2') . $ret->getAsHtml();
 						exit;
@@ -300,7 +291,7 @@ function g2_delete_user($wpuser_id) {
 	}
 
 	// Check to Make Sure User Does already Exist
-	list ($ret, $g2_results) = GalleryCoreApi::getMapEntry('ExternalIdMap', array('entityId'), array('externalId' => $wpuser_id, 'entityType' => 'GalleryUser'));
+	[$ret, $g2_results] = GalleryCoreApi::getMapEntry('ExternalIdMap', ['entityId'], ['externalId' => $wpuser_id, 'entityType' => 'GalleryUser']);
 	if ($g2_result = $g2_results->nextResult()) {
 	   $ret = GalleryEmbed::deleteUser($wpuser_id);
 		if ($ret) {
@@ -343,7 +334,7 @@ function g2_update_user($wpuser_id) {
     $usercap = new WP_User($wpuser_id);
     if ($usercap->has_cap('gallery2_user')) {
 		// Has password been hashed, then skip update.
-		if ( strlen($usercap->user_pass) > 32 ) {
+		if ( strlen((string) $usercap->user_pass) > 32 ) {
 			// Add BTEV Event Message
 			if (function_exists('btev_trigger_error')) {
 				btev_trigger_error('WPG2 WP USER ('.$usercap->id.') SKIPPED DUE TO HASHING', E_USER_ERROR, __FILE__);
@@ -353,8 +344,7 @@ function g2_update_user($wpuser_id) {
 	     // Check to Make Sure User Does already Exist
 			$ret = GalleryEmbed::isExternalIdMapped($wpuser_id, 'GalleryUser');
 			if ($ret) {
-		        $ret = GalleryEmbed::updateUser( $wpuser_id, array ( 'username' => $usercap->user_login, 'email' => $usercap->user_email, 'fullname' => $usercap->user_nicename,
-	                    'hashedpassword' => $usercap->user_pass, 'hashmethod' => 'md5'));
+		        $ret = GalleryEmbed::updateUser( $wpuser_id, ['username' => $usercap->user_login, 'email' => $usercap->user_email, 'fullname' => $usercap->user_nicename, 'hashedpassword' => $usercap->user_pass, 'hashmethod' => 'md5']);
 				// Add BTEV Event Message
 				if (function_exists('btev_trigger_error')) {
 					btev_trigger_error('WPG2 G2 USER (WP:'.$wpuser_id.') UPDATED', E_USER_NOTICE, __FILE__);
@@ -392,17 +382,17 @@ function g2_admin_user($wpuser_id) {
     $usercap = new WP_User($wpuser_id);
     if ($usercap->has_cap('gallery2_admin')) {
 	 // Check to Make Sure User Does already Exist
-		list ($ret, $g2_results) = GalleryCoreApi::getMapEntry('ExternalIdMap', array('entityId'), array('externalId' => $wpuser_id, 'entityType' => 'GalleryUser'));
+		[$ret, $g2_results] = GalleryCoreApi::getMapEntry('ExternalIdMap', ['entityId'], ['externalId' => $wpuser_id, 'entityType' => 'GalleryUser']);
 		if ($g2_result = $g2_results->nextResult()) {
-			list ($ret, $g2user) = GalleryCoreApi::loadEntityByExternalId($wpuser_id, 'GalleryUser');
+			[$ret, $g2user] = GalleryCoreApi::loadEntityByExternalId($wpuser_id, 'GalleryUser');
 			if ($ret) {
 				echo '<h2>' . __('Fatal G2 error', 'wpg2') . '</h2> ' . __("Here's the error from G2: ", 'wpg2') . $ret->getAsHtml();
 				exit;
 			}
 
-			list ($ret, $isAdmin) = GalleryCoreApi::isUserInSiteAdminGroup($g2user->id);
+			[$ret, $isAdmin] = GalleryCoreApi::isUserInSiteAdminGroup($g2user->id);
 			if (!$isAdmin) {
-			   list ($ret, $siteAdminGroupId) = GalleryCoreApi::getPluginParameter('module', 'core', 'id.adminGroup');
+			   [$ret, $siteAdminGroupId] = GalleryCoreApi::getPluginParameter('module', 'core', 'id.adminGroup');
 			   $ret = GalleryCoreApi::addUserToGroup($g2user->id, $siteAdminGroupId);
 				if ($ret) {
 					echo '<h2>' . __('Fatal G2 error', 'wpg2') . '</h2> ' . __("Here's the error from G2: ", 'wpg2') . $ret->getAsHtml();
@@ -415,16 +405,16 @@ function g2_admin_user($wpuser_id) {
 			}
 		}
 	} else {
-		list ($ret, $g2_results) = GalleryCoreApi::getMapEntry('ExternalIdMap', array('entityId'), array('externalId' => $wpuser_id, 'entityType' => 'GalleryUser'));
+		[$ret, $g2_results] = GalleryCoreApi::getMapEntry('ExternalIdMap', ['entityId'], ['externalId' => $wpuser_id, 'entityType' => 'GalleryUser']);
 		if ($g2_result = $g2_results->nextResult()) {
-			list ($ret, $g2user) = GalleryCoreApi::loadEntityByExternalId($wpuser_id, 'GalleryUser');
+			[$ret, $g2user] = GalleryCoreApi::loadEntityByExternalId($wpuser_id, 'GalleryUser');
 			if ($ret) {
 				echo '<h2>' . __('Fatal G2 error', 'wpg2') . '</h2> ' . __("Here's the error from G2: ", 'wpg2') . $ret->getAsHtml();
 				exit;
 			}
-			list ($ret, $isAdmin) = GalleryCoreApi::isUserInSiteAdminGroup($g2user->id);
+			[$ret, $isAdmin] = GalleryCoreApi::isUserInSiteAdminGroup($g2user->id);
 			if ($isAdmin) {
-			   list ($ret, $siteAdminGroupId) = GalleryCoreApi::getPluginParameter('module', 'core', 'id.adminGroup');
+			   [$ret, $siteAdminGroupId] = GalleryCoreApi::getPluginParameter('module', 'core', 'id.adminGroup');
 			   $ret = GalleryCoreApi::removeUserFromGroup($g2user->id, $siteAdminGroupId);
 				if ($ret) {
 					echo '<h2>' . __('Fatal G2 error', 'wpg2') . '</h2> ' . __("Here's the error from G2: ", 'wpg2') . $ret->getAsHtml();
@@ -463,21 +453,21 @@ function g2_fetchUserByUserEmail($userEmail=null) {
 	WHERE
 	  [GalleryUser::email] = ?
 	';
-	list ($ret, $searchResults) = $gallery->search($query, array($userEmail));
+	[$ret, $searchResults] = $gallery->search($query, [$userEmail]);
 	if ($ret) {
-		return array($ret, null);
+		return [$ret, null];
 	}
 
 	if ($searchResults->resultCount() == 0) {
-		return array(GalleryCoreApi::error(ERROR_MISSING_OBJECT), null);
+		return [GalleryCoreApi::error(ERROR_MISSING_OBJECT), null];
 	} else {
 		$result = $searchResults->nextResult();
 		$id = $result[0];
-		list ($ret, $user) = GalleryCoreApi::loadEntitiesById($id, 'GalleryUser');
+		[$ret, $user] = GalleryCoreApi::loadEntitiesById($id, 'GalleryUser');
 		if ($ret) {
-			return array($ret, null);
+			return [$ret, null];
 		}
-		return array(null, $user);
+		return [null, $user];
 	}
 }
 
@@ -524,14 +514,14 @@ function wpg2_validateg2url($g2url, $wpg2relpath=null) {
 	$embedUri = G2EmbedDiscoveryUtilities::normalizeG2Uri($site_url);
 	$file_path = ABSPATH;
 	// Try the first method of getting embedPhpPath
-	list ($success, $embedPhpPath, $errorString) = G2EmbedDiscoveryUtilities::getG2EmbedPathByG2Uri($g2Uri);
+	[$success, $embedPhpPath, $errorString] = G2EmbedDiscoveryUtilities::getG2EmbedPathByG2Uri($g2Uri);
 	if (!$success) {
 	// Try the second method of getting embedPhpPath
-		list ($success, $embedPhpPath, $errorString) = G2EmbedDiscoveryUtilities::getG2EmbedPathByG2UriEmbedUriAndLocation($g2Uri, $embedUri, $file_path);
+		[$success, $embedPhpPath, $errorString] = G2EmbedDiscoveryUtilities::getG2EmbedPathByG2UriEmbedUriAndLocation($g2Uri, $embedUri, $file_path);
 	}
 	if ($success){
 		// Set the Plugin Paths
-		$wpg2_g2path['g2_filepath'] = rtrim ($embedPhpPath, "embed.php");
+		$wpg2_g2path['g2_filepath'] = rtrim ((string) $embedPhpPath, "embed.php");
 
 		// Clean up File Structure..
 		$slash = DIRECTORY_SEPARATOR;
@@ -540,7 +530,7 @@ function wpg2_validateg2url($g2url, $wpg2relpath=null) {
 		$wpg2_g2path['g2_filepath'] = str_replace($doubleslash,$slash,$wpg2_g2path['g2_filepath']);
 		$wpg2_g2path['g2_filepath'] = str_replace('/', DIRECTORY_SEPARATOR, $wpg2_g2path['g2_filepath']);
 
-		$wpg2_g2path['g2_url'] = str_replace("//","/",$g2Uri);
+		$wpg2_g2path['g2_url'] = str_replace("//","/",(string) $g2Uri);
 		$wpg2_g2path['g2_url'] = str_replace('http:/', 'http://',$wpg2_g2path['g2_url']);
 
 		$wpg2_g2path['g2_errorredirect'] = get_option( 'home' );
@@ -551,7 +541,7 @@ function wpg2_validateg2url($g2url, $wpg2relpath=null) {
 		if (file_exists($wpg2relpath.DIRECTORY_SEPARATOR.'wp-login.php')) {
 			$wpg2relpath = '..'.DIRECTORY_SEPARATOR.$wpg2base;
 		} else {
-			$wpg2relpath = str_replace($wpg2relpath,'',ABSPATH); 
+			$wpg2relpath = str_replace($wpg2relpath,'',(string) ABSPATH); 
 			$wpg2relpath = '..'.$wpg2relpath.$wpg2base;
 		}
 
@@ -596,7 +586,7 @@ function wpg2_validateuri($wpg2uri) {
 	$wpg2base = 'wp-content'.$slash.'plugins'.$slash.'wpg2';
 
 	@include_once(ABSPATH . $wpg2base . $slash . 'g2embeddiscoveryutilities.class');
-	list ($success, $errorString) = G2EmbedDiscoveryUtilities::verifyUri($wpg2uri);
+	[$success, $errorString] = G2EmbedDiscoveryUtilities::verifyUri($wpg2uri);
 	if (!$success) {
 		// Return Error
 		$ret =  $errorString;
@@ -628,14 +618,14 @@ function g2_setrewriteepath() {
 	/*
 	 * Load the plugin even if it's deactivated since we only need it for setting the htaccess path as it's possible that this is getting called during activation when we won't be able to properly set the embedded htaccess path.
 	 */
-	list ($ret, $module) = GalleryCoreApi::loadPlugin('module', 'rewrite', true);
+	[$ret, $module] = GalleryCoreApi::loadPlugin('module', 'rewrite', true);
 	if (!$ret) {
 		// Find the File Path of WP
 		$wphome = get_option( 'home' );
 		if ( $wphome != '' && $wphome != get_option( 'siteurl' ) ) {
-		  $file_path = parse_url( $wphome );
+		  $file_path = parse_url( (string) $wphome );
 		  $file_path = $file_path['path'];
-		  $wproot = str_replace( $_SERVER["PHP_SELF"], '', $_SERVER["SCRIPT_FILENAME"] );
+		  $wproot = str_replace( $_SERVER["PHP_SELF"], '', (string) $_SERVER["SCRIPT_FILENAME"] );
 		  $embeddedHtaccess = trailingslashit( $wproot.$file_path );
 		} else {
 		 $embeddedHtaccess = ABSPATH;
@@ -643,8 +633,8 @@ function g2_setrewriteepath() {
 
 		// Find the URL of WP
 		$site_url = trailingslashit(get_option('home'));
-		$site_path = str_replace(('https://' . $_SERVER['HTTP_HOST']),'', $site_url);
-		$embeddedLocation = str_replace(('http://' . $_SERVER['HTTP_HOST']),'', $site_url);
+		$site_path = str_replace(('https://' . $_SERVER['HTTP_HOST']),'', (string) $site_url);
+		$embeddedLocation = str_replace(('http://' . $_SERVER['HTTP_HOST']),'', (string) $site_url);
 
 		// Commit The Values - Do not trap Failures..
 		$ret = GalleryCoreApi::setPluginParameter('module', 'rewrite', 'modrewrite.embeddedHtaccess', $embeddedHtaccess);
@@ -674,9 +664,9 @@ function g2_verifyhtaccess() {
 	// Find the File Path of WP
 	$wphome = get_option( 'home' );
 	if ( $wphome != '' && $wphome != get_option( 'siteurl' ) ) {
-	  $file_path = parse_url( $wphome );
+	  $file_path = parse_url( (string) $wphome );
 	  $file_path = $file_path['path'];
-	  $wproot = str_replace( $_SERVER["PHP_SELF"], '', $_SERVER["SCRIPT_FILENAME"] );
+	  $wproot = str_replace( $_SERVER["PHP_SELF"], '', (string) $_SERVER["SCRIPT_FILENAME"] );
 	  $file_path = trailingslashit( $wproot.$file_path );
 	} else {
 	  $file_path = ABSPATH;
@@ -738,23 +728,23 @@ function g2_activaterewrites() {
 	}
 
 	// Turn on Rewrite Module
-	list ($ret, $ignored) = GalleryCoreApi::activatePlugin('module', 'rewrite');
+	[$ret, $ignored] = GalleryCoreApi::activatePlugin('module', 'rewrite');
 
 	// Get the Gallery2 Rewrite Configuration
-	list ($ret, $rewriteApi) = GalleryCoreApi::newFactoryInstance('RewriteApi');
+	[$ret, $rewriteApi] = GalleryCoreApi::newFactoryInstance('RewriteApi');
 		if ($ret) {
 			echo '<h2>' . __('Fatal G2 error', 'wpg2') . '</h2> ' . __("Here's the error from G2: ", 'wpg2') . $ret->getAsHtml();
 			exit;
 		}
 
     // Load the G2 Rewrite Values
-	list ($ret, $params) = $rewriteApi->fetchEmbedConfig();
+	[$ret, $params] = $rewriteApi->fetchEmbedConfig();
 
 	// Save the G2 rewrite Values
-	list ($ret, $code, $err) = $rewriteApi->saveEmbedConfig($params);
+	[$ret, $code, $err] = $rewriteApi->saveEmbedConfig($params);
 
 	if ( $code > 0 ) {
-		list ($ret, $errstr) = $err;
+		[$ret, $errstr] = $err;
 		$errstr =  $code." - ".$errstr;
 		// Add BTEV Event Message
 		if (function_exists('btev_trigger_error')) {
@@ -792,7 +782,7 @@ function g2_tagimageblock( $g2inputstr ) {
 
 	global $post;
 
-	if ($wpg2_option['g2_validated'] == "Yes") {
+	if (isset($wpg2_option['g2_validated']) == "Yes") {
 
 		// Initialize Gallery
 		if (!defined('G2INIT')) {
@@ -804,11 +794,11 @@ function g2_tagimageblock( $g2inputstr ) {
 		}
 
 		// Check for the Item Size | parameter & Clean up Strings..
-		$g2itempos = strpos ($g2inputstr, '|');
+		$g2itempos = strpos ((string) $g2inputstr, '|');
 
 		if ($g2itempos) {
-			$g2itemsize = substr ($g2inputstr, $g2itempos+1);
-			$g2itemid = substr ($g2inputstr, 0, $g2itempos);
+			$g2itemsize = substr ((string) $g2inputstr, $g2itempos+1);
+			$g2itemid = substr ((string) $g2inputstr, 0, $g2itempos);
 		} else {
 			$g2itemsize = $wpg2_option['g2_postimgsize'];
 			$g2itemid = $g2inputstr;
@@ -816,16 +806,16 @@ function g2_tagimageblock( $g2inputstr ) {
 
 		if ( !is_numeric($g2itemid) ) {
 			// Make Sure Item Path does not contain a + as it should instead be a space
-			$g2itemid = str_replace ("+", " ", $g2itemid);
+			$g2itemid = str_replace ("+", " ", (string) $g2itemid);
 
 			// Get the Image ID
-			list ($ret, $g2itemid) = GalleryCoreAPI::fetchItemIdByPath($g2itemid);
+			[$ret, $g2itemid] = GalleryCoreAPI::fetchItemIdByPath($g2itemid);
 			if ($ret) {
 				$img = '* ' . __('WPG2 CANNOT LOCATE GALLERY2 ITEM BY '.$g2itemid, 'wpg2') . ' *';
 				return $img;
 			}
 		} else {
-				list ($ret, $g2item) = GalleryCoreApi::loadEntitiesById($g2itemid);
+				[$ret, $g2item] = GalleryCoreApi::loadEntitiesById($g2itemid);
 			if ($ret) {
 				$img = '* ' . __('WPG2 CANNOT LOCATE GALLERY2 ITEM ID '.$g2itemid, 'wpg2') . ' *';
 				return $img;
@@ -862,14 +852,14 @@ function g2_tagimageblock( $g2inputstr ) {
 			$blockoptions['albumFrame']  = $wpg2_option['g2_tagalbumframe'];
 
 		if ($wpg2_option['wpg2_enabletagslightbox'])
-			list ($ret, $img, $headimg, $g2_isalbum ) = g2_getLightImageBlock($blockoptions,$wpg2_option['g2_lightboximgsize'],'wpg2tag-image');
+			[$ret, $img, $headimg, $g2_isalbum] = g2_getLightImageBlock($blockoptions,$wpg2_option['g2_lightboximgsize'],'wpg2tag-image');
 		else
-			list ($ret, $img, $headimg, $g2_isalbum ) = g2_getLightImageBlock($blockoptions,null,'wpg2tag-image');
+			[$ret, $img, $headimg, $g2_isalbum] = g2_getLightImageBlock($blockoptions,null,'wpg2tag-image');
 
 		if ($ret)
 			$img = $ret->getAsHtml().print_r($blockoptions);
 
-		$img = preg_replace("/(\s+)?(\<.+\>)(\s+)?/", "$2", $img);
+		$img = preg_replace("/(\s+)?(\<.+\>)(\s+)?/", "$2", (string) $img);
 		$img = str_replace("\n", "", $img); // strip out CRs
 
 		if ($wpg2_option['wpg2_enabletagslightbox'] && !$g2_isalbum)
@@ -902,7 +892,7 @@ function g2_sidebarimageblock( $g2itemid=null ) {
 	// Set error Title
 	$headimg = '<h2>' . __('Sidebar Block', 'wpg2') . '</h2>';
 
-	if ($wpg2_option['g2_validated'] == "Yes") {
+	if (isset($wpg2_option['g2_validated']) == "Yes") {
 
 	// Do we have configuration?
 		if ( count ($wpg2_option['g2_sidebarblock']) > 1 || $g2itemid != ""  ) {
@@ -960,11 +950,11 @@ function g2_sidebarimageblock( $g2itemid=null ) {
 
 			// Get Image Block
 				if ($wpg2_option['wpg2_enablesidebarlightbox'])
-					list ($ret, $img, $headimg, $g2_isalbum ) = g2_getLightImageBlock($blockoptions,$wpg2_option['g2_lightboximgsize'],'wpg2sidebarblock-image');
+					[$ret, $img, $headimg, $g2_isalbum] = g2_getLightImageBlock($blockoptions,$wpg2_option['g2_lightboximgsize'],'wpg2sidebarblock-image');
 				else
-					list ($ret, $img, $headimg, $g2_isalbum ) = g2_getLightImageBlock($blockoptions,null,'wpg2sidebarblock-image');
+					[$ret, $img, $headimg, $g2_isalbum] = g2_getLightImageBlock($blockoptions,null,'wpg2sidebarblock-image');
 
-				$img = preg_replace("/(\s+)?(\<.+\>)(\s+)?/", "$2", $img);
+				$img = preg_replace("/(\s+)?(\<.+\>)(\s+)?/", "$2", (string) $img);
 				$img = str_replace("\n", "", $img); // strip out CRs
 
 				if ($wpg2_option['wpg2_enablesidebarlightbox'] && !$g2_isalbum)
@@ -1006,7 +996,7 @@ function g2_sidebargridblock( $g2blocktype="", $g2blockelements="", $g2blockmaxi
 	// Set error Title
 	$title = '<h2>' . __('Sidebar Grid', 'wpg2') . '</h2>';
 
-	if ($wpg2_option['g2_validated'] == "Yes") {
+	if (isset($wpg2_option['g2_validated']) == "Yes") {
 
 		// Do we have configuration?
 		if ( $wpg2_option['g2_sidebargridblockstype'] || $g2blocktype !=""  ) {
@@ -1014,23 +1004,13 @@ function g2_sidebargridblock( $g2blocktype="", $g2blockelements="", $g2blockmaxi
 			if ( $g2blocktype == "" ) {
 				 $g2blocktype = $wpg2_option['g2_sidebargridblockstype'];
 			}
-			switch ($g2blocktype) {
-				case "randomImage":
-					$title = '<h2>' . __('Random Image', 'wpg2') . '</h2>';
-					break;
-				case "recentImage":
-					$title = '<h2>' . __('Recent Image', 'wpg2') . '</h2>';
-					break;
-				case "randomAlbum":
-					$title = '<h2>' . __('Random Album', 'wpg2') . '</h2>';
-					break;
-				case "recentAlbum":
-					$title = '<h2>' . __('Recent Album', 'wpg2') . '</h2>';
-					break;
-				default:
-					$title = __('Error', 'wpg2');
-					break;
-			}
+			$title = match ($g2blocktype) {
+       "randomImage" => '<h2>' . __('Random Image', 'wpg2') . '</h2>',
+       "recentImage" => '<h2>' . __('Recent Image', 'wpg2') . '</h2>',
+       "randomAlbum" => '<h2>' . __('Random Album', 'wpg2') . '</h2>',
+       "recentAlbum" => '<h2>' . __('Recent Album', 'wpg2') . '</h2>',
+       default => __('Error', 'wpg2'),
+   };
 
 			// if no option was passed, set to setting in options
 			if ( $g2blockelements == "" ) {
@@ -1083,11 +1063,11 @@ function g2_sidebargridblock( $g2blocktype="", $g2blockelements="", $g2blockmaxi
 				//Get Image Block
 
 				if ($wpg2_option['wpg2_enablesidebarlightbox'])
-					list ($ret, $img, $headimg, $g2_isalbum ) = g2_getLightImageBlock($blockoptions,$wpg2_option['g2_lightboximgsize'],'wpg2sidebargrid-image');
+					[$ret, $img, $headimg, $g2_isalbum] = g2_getLightImageBlock($blockoptions,$wpg2_option['g2_lightboximgsize'],'wpg2sidebargrid-image');
 				else
-					list ($ret, $img, $headimg, $g2_isalbum ) = g2_getLightImageBlock($blockoptions,null,'wpg2sidebargrid-image');
+					[$ret, $img, $headimg, $g2_isalbum] = g2_getLightImageBlock($blockoptions,null,'wpg2sidebargrid-image');
 
-				$img = preg_replace("/(\s+)?(\<.+\>)(\s+)?/", "$2", $img);
+				$img = preg_replace("/(\s+)?(\<.+\>)(\s+)?/", "$2", (string) $img);
 				$img = str_replace("\n", "", $img); // strip out CRs
 
 				if ($wpg2_option['wpg2_enablesidebarlightbox'] && !$g2_isalbum)
@@ -1142,12 +1122,12 @@ function wpg2_make_html_album_tree(){
 		}
 
 		// Check for G2 Core API >= 7.5.  getDefaultAlbumId only available at 7.5 or above
-		if (GalleryUtilities::isCompatibleWithApi(array(7,5), GalleryCoreApi::getApiVersion())) {
-			list($error, $root_album) = GalleryCoreApi::getDefaultAlbumId();
+		if (GalleryUtilities::isCompatibleWithApi([7, 5], GalleryCoreApi::getApiVersion())) {
+			[$error, $root_album] = GalleryCoreApi::getDefaultAlbumId();
 		}
 		// Otherwise use a Gallery2 2.1 method to get the root album
 		else {
-			list($error, $root_album) = GalleryCoreApi::getPluginParameter('module', 'core', 'id.rootAlbum');
+			[$error, $root_album] = GalleryCoreApi::getPluginParameter('module', 'core', 'id.rootAlbum');
 		}
 
 		// Album navigation
@@ -1186,20 +1166,20 @@ function wpg2_make_html_album_tree_branches($current_album, $parent, &$node) {
 
 	$wpg2_g2path = get_option('wpg2_g2paths');
 
-	list ($error,$items) = GalleryCoreApi::loadEntitiesById(array($current_album));
+	[$error, $items] = GalleryCoreApi::loadEntitiesById([$current_album]);
 	if(!$error){
 		foreach ($items as $item) {
 			$album_title = $item->getTitle();
-			$album_title = preg_replace("/(\n|\r)/"," ",$album_title);
+			$album_title = preg_replace("/(\n|\r)/"," ",(string) $album_title);
 			if(empty($album_title)) {
 				$album_title = $item->getPathComponent();
 			}
-			$album_url = $urlGenerator->generateUrl(array('view' => 'core.ShowItem', 'itemId' => $item->getid()), array('forceServerRelativeUrl' => true));
+			$album_url = $urlGenerator->generateUrl(['view' => 'core.ShowItem', 'itemId' => $item->getid()], ['forceServerRelativeUrl' => true]);
 		}
 		$html .= '        d.add(' . $node . ',' . $parent . ',"' . $album_title . '","'	. $album_url . '");' . "\n";
 	}
 
-	list($error, $sub_albums) = GalleryCoreApi::fetchAlbumTree($current_album,1);
+	[$error, $sub_albums] = GalleryCoreApi::fetchAlbumTree($current_album,1);
 
 	$albums = array_keys($sub_albums);
 
@@ -1226,7 +1206,7 @@ function g2_imagebypathinpost($text) {
 	// Get WPG2 Option Settings
 	$wpg2_option = get_option('wpg2_options');
 
-	$output = preg_replace_callback('/<wpg2>(.*?)<\/wpg2>/', create_function('$m', 'return g2_tagimageblock($m[1]);'), $text);
+	$output = preg_replace_callback('/<wpg2>(.*?)<\/wpg2>/', fn($m) => g2_tagimageblock($m[1]), $text);
 
 	return $output;
 }
@@ -1242,7 +1222,7 @@ function g2_imagebyidinpost($text) {
 	// Get WPG2 Option Settings
 	$wpg2_option = get_option('wpg2_options');
 
-	$output = preg_replace_callback('/<wpg2id>(.*?)<\/wpg2id>/i', create_function('$m', 'return g2_tagimageblock($m[1]);'), $text);
+	$output = preg_replace_callback('/<wpg2id>(.*?)<\/wpg2id>/i', fn($m) => g2_tagimageblock($m[1]), $text);
 
 	return $output;
 }
@@ -1271,9 +1251,9 @@ function g2_get_imageframes() {
 
 	// Get & Return Gallery2 Image Frame List
 	$g2framelist = '';
-	list ($ret, $g2imageframe) = GalleryCoreApi::newFactoryInstance('ImageFrameInterface_1_1');
+	[$ret, $g2imageframe] = GalleryCoreApi::newFactoryInstance('ImageFrameInterface_1_1');
 	if (!$ret)
-		list ($ret, $g2framelist) = $g2imageframe->getImageFrameList();
+		[$ret, $g2framelist] = $g2imageframe->getImageFrameList();
 
 	// Add BTEV Event Message
 	if (function_exists('btev_trigger_error')) {
@@ -1325,13 +1305,13 @@ function g2_getLightImageBlock($params,$size=null,$cssclass=null) {
 	$blockHtml = $headHtml = null;
 
 	if ($ret) {
-	    return array($ret, null, null);
+	    return [$ret, null, null];
 	}
 	
 	/* Load the module list */
-	list ($ret, $moduleStatus) = GalleryCoreApi::fetchPluginStatus('module');
+	[$ret, $moduleStatus] = GalleryCoreApi::fetchPluginStatus('module');
 	if ($ret) {
-		return array($ret, null, null, null);
+		return [$ret, null, null, null];
 	}
 
 	if (isset($moduleStatus[$moduleId]) && !empty($moduleStatus[$moduleId]['active'])
@@ -1351,7 +1331,7 @@ function g2_getLightImageBlock($params,$size=null,$cssclass=null) {
 			'modules/imageblock/classes/ImageBlockHelper.class');
 		$ret = ImageBlockHelper::loadImageBlocks($template, $params);
 		if ($ret) {
-			return array($ret, null, null, null);
+			return [$ret, null, null, null];
 		}
 
 		if ($template->hasVariable('ImageBlockData')) {
@@ -1365,9 +1345,9 @@ function g2_getLightImageBlock($params,$size=null,$cssclass=null) {
 					if (!$ImageBlockData['blocks'][$blockid]['item']['canContainChildren']) {
 						$g2_isalbum = NULL;
 						$g2_link = NULL;
-						list ($ret, $ImageBlockData['blocks'][$blockid]['lightboxid'], $isViewable) = g2_lightboxgetItemUrls($ImageBlockData['blocks'][$blockid]['id'],$size);
+						[$ret, $ImageBlockData['blocks'][$blockid]['lightboxid'], $isViewable] = g2_lightboxgetItemUrls($ImageBlockData['blocks'][$blockid]['id'],$size);
 						if ($ret) {
-							return array($ret, null, null, null);
+							return [$ret, null, null, null];
 						} else {
 							if ($isViewable === FALSE)
 								$g2_isalbum = true;
@@ -1380,16 +1360,16 @@ function g2_getLightImageBlock($params,$size=null,$cssclass=null) {
 			$tpl = $wpg2_g2path['wpg2_relativepath'].DIRECTORY_SEPARATOR.'templates'.DIRECTORY_SEPARATOR.'wpg2imageblock.tpl';
 
 			/* Render and get the imageblock html */
-			list ($ret, $blockHtml) = $template->fetch("gallery:$tpl");
+			[$ret, $blockHtml] = $template->fetch("gallery:$tpl");
 			if ($ret) {
-				return array($ret, null, null, null);
+				return [$ret, null, null, null];
 			}
 
 		}
 	} else {
-		return array(GalleryCoreApi::error(ERROR_CONFIGURATION_REQUIRED), null, null, null);
+		return [GalleryCoreApi::error(ERROR_CONFIGURATION_REQUIRED), null, null, null];
 	}
-	return array(null, $blockHtml, $headHtml, $g2_isalbum);
+	return [null, $blockHtml, $headHtml, $g2_isalbum];
 }
 
 /**
@@ -1416,32 +1396,32 @@ function g2_lightboxgetItemUrls($itemId, $size=null) {
 
 	$thumbUrl = $targetUrl = null;
 
-	list ($ret, $permissions) = GalleryCoreApi::getPermissions($itemId);
+	[$ret, $permissions] = GalleryCoreApi::getPermissions($itemId);
 	if ($ret) {
-		return array($ret, null, null);
+		return [$ret, null, null];
 	}
 
 	if (!isset($permissions['core.view'])) {
-		return array (null, null, null); // no access
+		return [null, null, null]; // no access
 	}
 
-	list ($ret, $thumbnail) = GalleryCoreApi::fetchThumbnailsByItemIds(array($itemId));
+	[$ret, $thumbnail] = GalleryCoreApi::fetchThumbnailsByItemIds([$itemId]);
 	if ($ret) {
 		return $ret;
 	}
 
-	$targetCandidates = array();
+	$targetCandidates = [];
 	if (!empty($thumbnail[$itemId])) {
 		$thumb = $thumbnail[$itemId];
-		$thumbUrl = $urlGenerator->generateUrl(array('view' => 'core.DownloadItem', 'itemId' => $thumb->getId(), 'serialNumber' => $thumb->getSerialNumber()), array('forceFullUrl' => true));
+		$thumbUrl = $urlGenerator->generateUrl(['view' => 'core.DownloadItem', 'itemId' => $thumb->getId(), 'serialNumber' => $thumb->getSerialNumber()], ['forceFullUrl' => true]);
 
 		$targetCandidates[] = $thumb;
 	}
 
 	if (isset($permissions['core.viewResizes'])) {
-		list ($ret, $resizes) = GalleryCoreApi::fetchResizesByItemIds(array($itemId));
+		[$ret, $resizes] = GalleryCoreApi::fetchResizesByItemIds([$itemId]);
 		if ($ret) {
-			return array($ret, null, null);
+			return [$ret, null, null];
 		}
 
 		if (!empty($resizes[$itemId])) {
@@ -1452,18 +1432,18 @@ function g2_lightboxgetItemUrls($itemId, $size=null) {
 	}
 
 	if (isset($permissions['core.viewSource'])) {
-		list ($ret, $preferred) = GalleryCoreApi::fetchPreferredsByItemIds(array($itemId));
+		[$ret, $preferred] = GalleryCoreApi::fetchPreferredsByItemIds([$itemId]);
 		if ($ret) {
-			return array($ret, null, null);
+			return [$ret, null, null];
 		}
 		if (!empty($preferred[$itemId])) {
 			$preferred = $preferred[$itemId];
 			$targetCandidates[] = $preferred;
 			$isViewable = $preferred->getMimeType();
 		} else {
-			list ($ret, $item) = GalleryCoreApi::loadEntitiesById($itemId);
+			[$ret, $item] = GalleryCoreApi::loadEntitiesById($itemId);
 			if ($ret) {
-				return array($ret, null, null);
+				return [$ret, null, null];
 			}
 			else {
 				$targetCandidates[] = $item;
@@ -1480,7 +1460,7 @@ function g2_lightboxgetItemUrls($itemId, $size=null) {
 		btev_trigger_error('Source ID:'.$itemId.' Mine Type:'.$isViewable	, E_USER_NOTICE, __FILE__);
 	}
 
-	$isViewable = strpos($isViewable, 'image');
+	$isViewable = strpos((string) $isViewable, 'image');
 	if ($isViewable !== FALSE) {
 		if ($size == null) {
 			/* Pick the largest version */
@@ -1512,7 +1492,7 @@ function g2_lightboxgetItemUrls($itemId, $size=null) {
 		}
 	}
 	
-	return array(null, $targetid, $isViewable);
+	return [null, $targetid, $isViewable];
 }
 
 ?>

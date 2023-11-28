@@ -139,7 +139,7 @@ function wpg2_g2rewritesvalidate($wpg2_outputtype, $wpg2_option ) {
 // Does the Rewrite Plugin Exist?
 	if (!$validate_err) {
 		$environment_html .= __('2. Is Gallery2 Rewrite Plugin Loaded? - [' , 'wpg2');
-		list ($ret, $g2_modulestatus ) = GalleryCoreApi::fetchPluginStatus('module');
+		[$ret, $g2_modulestatus] = GalleryCoreApi::fetchPluginStatus('module');
 		if (!$ret) {
 			if (isset($g2_modulestatus['rewrite']))
 				$environment_html .= '<font color="green">' . __('Yes', 'wpg2') . '</font>';
@@ -172,7 +172,7 @@ function wpg2_g2rewritesvalidate($wpg2_outputtype, $wpg2_option ) {
 	if (!$validate_err) {
 		$environment_html .=  __('4. Is Gallery2 Rewrite using Apache Mod_Rewrite? - [' , 'wpg2');
 		GalleryCoreApi::requireOnce('modules/rewrite/classes/RewriteHelper.class');
-		list ($ret, $rewriteParser) = RewriteHelper::getRewriteParser();
+		[$ret, $rewriteParser] = RewriteHelper::getRewriteParser();
 		if (!$ret) {
 			if ('modrewrite' == $rewriteParser->getParserId())
 					$environment_html .= '<font color="green">' . __('Yes', 'wpg2') . '</font>';
@@ -209,9 +209,9 @@ function wpg2_g2rewritesvalidate($wpg2_outputtype, $wpg2_option ) {
 	if ($validate_err || $wpg2_option['g2_rewriteactive'] != 'active') {
 		// Check G2 Rewrite Module, it should be deactivated
 		$g2_moduleid = 'rewrite';
-		list ($ret, $g2_modulestatus ) = GalleryCoreApi::fetchPluginStatus('module');
+		[$ret, $g2_modulestatus] = GalleryCoreApi::fetchPluginStatus('module');
 		if (isset($g2_modulestatus[$g2_moduleid]) && !empty($g2_modulestatus[$g2_moduleid]['active']) && $g2_modulestatus[$g2_moduleid]['active']) {
-			list ($ret, $ignored) = GalleryCoreApi::deactivatePlugin('module', 'rewrite');
+			[$ret, $ignored] = GalleryCoreApi::deactivatePlugin('module', 'rewrite');
 		}
 	} else {
 		$ret = g2_activaterewrites();

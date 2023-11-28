@@ -33,7 +33,7 @@ if (!class_exists('gettext_reader')){
 // Variables
 
 global $text_domains, $default_domain, $CURRENTLOCALE;
-$text_domains = array();
+$text_domains = [];
 $default_domain = 'default';
 $CURRENTLOCALE = '';
 
@@ -48,7 +48,7 @@ function _get_reader($domain=null, $enable_cache=true) {
 	if (!isset($text_domains[$domain]->l10n)) {
 		// get the current locale
 		$locale = $CURRENTLOCALE;
-		$p = isset($text_domains[$domain]->path) ? $text_domains[$domain]->path : './';
+		$p = $text_domains[$domain]->path ?? './';
 		$path = $p . "$locale.mo";
 		if (file_exists($path)) {
 			$input = new FileReader($path);
@@ -67,7 +67,7 @@ function _get_reader($domain=null, $enable_cache=true) {
 function _get_codeset($domain=null) {
 	global $text_domains, $default_domain;
 	if (!isset($domain)) $domain = $default_domain;
-	return (isset($text_domains[$domain]->codeset))? $text_domains[$domain]->codeset : ini_get('mbstring.internal_encoding');
+	return $text_domains[$domain]->codeset ?? ini_get('mbstring.internal_encoding');
 }
 
 /**
@@ -81,7 +81,7 @@ function _encode($text) {
 	// See http://www.php.net/mbstring for more information.
 
 	if (function_exists('mb_detect_encoding')) {
-		$source_encoding = mb_detect_encoding($text);
+		$source_encoding = mb_detect_encoding((string) $text);
 	}
 	else {
 		$source_encoding = 'UTF-8';
@@ -89,7 +89,7 @@ function _encode($text) {
 
 	$target_encoding = _get_codeset();
 	if (($source_encoding != $target_encoding) && (function_exists('mb_convert_encoding'))) {
-		return mb_convert_encoding($text, $target_encoding, $source_encoding);
+		return mb_convert_encoding((string) $text, $target_encoding, $source_encoding);
 	}
 	else {
 		return $text;
@@ -115,9 +115,10 @@ function _setlocale($category, $locale) {
  */
 function _bindtextdomain($domain, $path) {
 	global $text_domains;
+	$text_domains[$domain] = new stdClass;
 	// ensure $path ends with a slash
-	if ($path[strlen($path) - 1] != '/') $path .= '/';
-	elseif ($path[strlen($path) - 1] != '\\') $path .= '\\';
+	if ($path[strlen((string) $path) - 1] != '/') $path .= '/';
+	elseif ($path[strlen((string) $path) - 1] != '\\') $path .= '\\';
 	$text_domains[$domain]->path = $path;
 }
 

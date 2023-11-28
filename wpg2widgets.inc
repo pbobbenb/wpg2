@@ -87,7 +87,7 @@ function wpg2_widget_albumtree_display($args) {
 function wpg2_widget_sidebarblock_control() {
 	$options = $newoptions = get_option('wpg2_widget_block');
 	if ( $_POST["wpg2_widget_block_submit"] ) {
-		$newoptions['title'] = strip_tags(stripslashes($_POST["wpg2_widget_block_title"]));
+		$newoptions['title'] = strip_tags(stripslashes((string) $_POST["wpg2_widget_block_title"]));
 	}
 	if ( $options != $newoptions ) {
 		$options = $newoptions;
@@ -113,7 +113,7 @@ function wpg2_widget_sidebargridblock_control() {
 	$options = $newoptions = get_option('wpg2_widget_gridblock');
 	$wpg2_option = get_option('wpg2_options');
 	if ( $_POST["wpg2_widget_grid_submit"] ) {
-		$newoptions['title'] = strip_tags(stripslashes($_POST["wpg2_widget_gridblock_title"]));
+		$newoptions['title'] = strip_tags(stripslashes((string) $_POST["wpg2_widget_gridblock_title"]));
 	}
 	if ( $options != $newoptions ) {
 		$options = $newoptions;
@@ -138,7 +138,7 @@ function wpg2_widget_albumtree_control() {
 	$options = $newoptions = get_option('wpg2_widget_albumtree');
 	$wpg2_option = get_option('wpg2_options');
 	if ( $_POST["wpg2_widget_albumtree_submit"] ) {
-		$newoptions['title'] = strip_tags(stripslashes($_POST["wpg2_widget_albumtree_title"]));
+		$newoptions['title'] = strip_tags(stripslashes((string) $_POST["wpg2_widget_albumtree_title"]));
 	}
 	if ( $options != $newoptions ) {
 		$options = $newoptions;
@@ -162,7 +162,7 @@ function wpg2_widget_albumtree_simpleviewer_control() {
 	$options = $newoptions = get_option('wpg2_widget_albumtree_simpleviewer');
 	$wpg2_option = get_option('wpg2_options');
 	if ( $_POST["wpg2_widget_albumtree_simpleviewer_submit"] ) {
-		$newoptions['title'] = strip_tags(stripslashes($_POST["wpg2_widget_albumtree_simpleviewer_title"]));
+		$newoptions['title'] = strip_tags(stripslashes((string) $_POST["wpg2_widget_albumtree_simpleviewer_title"]));
 	}
 	if ( $options != $newoptions ) {
 		$options = $newoptions;

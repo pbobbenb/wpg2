@@ -45,10 +45,10 @@ function wpg2_pathadmin() {
 				$wpg2_g2path['g2_url'] = G2EmbedDiscoveryUtilities::normalizeG2Uri($wpg2_g2path['g2_url']);
 			}
 			$doubleslash = DIRECTORY_SEPARATOR.DIRECTORY_SEPARATOR;
-			$wpg2_g2path['g2_filepath'] = str_replace($doubleslash,DIRECTORY_SEPARATOR,$wpg2_g2path['g2_filepath']);
+			$wpg2_g2path['g2_filepath'] = str_replace($doubleslash,DIRECTORY_SEPARATOR,(string) $wpg2_g2path['g2_filepath']);
 			$wpg2_g2path['g2_filepath'] = str_replace($doubleslash,DIRECTORY_SEPARATOR,$wpg2_g2path['g2_filepath']);
 			$wpg2_g2path['g2_filepath'] = str_replace('/', DIRECTORY_SEPARATOR, $wpg2_g2path['g2_filepath']);
-			$wpg2_g2path['wpg2_relativepath'] = str_replace($doubleslash,DIRECTORY_SEPARATOR,$wpg2_g2path['wpg2_relativepath']);
+			$wpg2_g2path['wpg2_relativepath'] = str_replace($doubleslash,DIRECTORY_SEPARATOR,(string) $wpg2_g2path['wpg2_relativepath']);
 			$wpg2_g2path['wpg2_relativepath'] = str_replace($doubleslash,DIRECTORY_SEPARATOR,$wpg2_g2path['wpg2_relativepath']);
 
 			update_option('wpg2_g2paths', $wpg2_g2path);
@@ -499,20 +499,20 @@ function wpg2_optionswpg2outputpage() {
 				?>
 					<th scope="row"><?php _e('HTML &lt;HEAD&gt; Tag ', 'wpg2') ?> </th>
 					<td>
-					<textarea name="wpg2_options[g2_htmlheader]" cols="80" rows="4"><?php echo stripslashes($wpg2_option['g2_htmlheader']); ?></textarea><br / >	
+					<textarea name="wpg2_options[g2_htmlheader]" cols="80" rows="4"><?php echo stripslashes((string) $wpg2_option['g2_htmlheader']); ?></textarea><br / >	
 					<?php _e('(HTML Elements to be dynamically added to create &lt;head&gt;)', 'wpg2') ?> 
 					</td></tr>
 					<tr valign="top">
 					<th scope="row"><?php _e('HTML &lt;body&gt; Tag', 'wpg2') ?> </th>
 					<td>
-					<textarea name="wpg2_options[g2_htmlbody]" cols="80" rows="2"><?php echo stripslashes($wpg2_option['g2_htmlbody']); ?></textarea><br / >
+					<textarea name="wpg2_options[g2_htmlbody]" cols="80" rows="2"><?php echo stripslashes((string) $wpg2_option['g2_htmlbody']); ?></textarea><br / >
 					<?php _e('(HTML Elements to be dynamically added to create  &lt;body&gt;)', 'wpg2') ?>
 					</td>
 					</tr>
 					<tr valign="top">
 					<th scope="row"><?php _e('HTML &lt;/html&gt; Tag', 'wpg2') ?> </th>
 					<td>
-					<textarea name="wpg2_options[g2_htmlfooter]" cols="80" rows="2"><?php echo stripslashes($wpg2_option['g2_htmlfooter']); ?></textarea><br / >
+					<textarea name="wpg2_options[g2_htmlfooter]" cols="80" rows="2"><?php echo stripslashes((string) $wpg2_option['g2_htmlfooter']); ?></textarea><br / >
 					<?php _e('(HTML Elements to be dynamically added to create &lt;/html&gt;', 'wpg2') ?>
 					</td>
 					</tr>
@@ -521,20 +521,20 @@ function wpg2_optionswpg2outputpage() {
 				?>
 					<th scope="row"><?php _e('CSS Style Elements Header', 'wpg2') ?> </th>
 					<td>
-					<textarea name="wpg2_options[g2_cssheader]" cols="40" rows="2"><?php echo stripslashes($wpg2_option['g2_cssheader']); ?></textarea><br / >	
+					<textarea name="wpg2_options[g2_cssheader]" cols="40" rows="2"><?php echo stripslashes((string) $wpg2_option['g2_cssheader']); ?></textarea><br / >	
 					<?php _e('(N/A when using Custom wpg2header)<br/>Stylesheet Elements to be dynamically added to the Wordpress Header prior to &lt;/head&gt;', 'wpg2') ?> 
 					</td></tr>
 					<tr valign="top">
 					<th scope="row"><?php _e('Simple Style Elements Header', 'wpg2') ?> </th>
 					<td>
-					<textarea name="wpg2_options[g2_header]" cols="40" rows="2"><?php echo stripslashes($wpg2_option['g2_header']); ?></textarea><br / >
+					<textarea name="wpg2_options[g2_header]" cols="40" rows="2"><?php echo stripslashes((string) $wpg2_option['g2_header']); ?></textarea><br / >
 					<?php _e('(N/A when using Custom wpg2footer)<br/>Styling Elements to be dynamically added to the Wordpress Footer prior to &lt;/body&gt;', 'wpg2') ?>
 					</td>
 					</tr>
 					<tr valign="top">
 					<th scope="row"><?php _e('Simple Style Elements Footer', 'wpg2') ?> </th>
 					<td>
-					<textarea name="wpg2_options[g2_footer]" cols="40" rows="2"><?php echo stripslashes($wpg2_option['g2_footer']); ?></textarea><br / >
+					<textarea name="wpg2_options[g2_footer]" cols="40" rows="2"><?php echo stripslashes((string) $wpg2_option['g2_footer']); ?></textarea><br / >
 					<?php _e('(N/A when using Custom wpg2footer)<br/>Styling Elements to be dynamically added to the Wordpress Footer prior to &lt;/body&gt;', 'wpg2') ?>
 					</td>
 					</tr>

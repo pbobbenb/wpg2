@@ -97,11 +97,11 @@ if (function_exists('btev_trigger_error')) {
 // ---- END ACTIONS
 
 // Renew a List of all externally Mapped Users in Gallery2
-	list ($ret, $g2users) = GalleryEmbed::getExternalIdMap('externalId');
+	[$ret, $g2users] = GalleryEmbed::getExternalIdMap('externalId');
 	if (!$ret) {
 		foreach ($g2users as $g2user) {
 			if ( $g2user['entityType'] == "GalleryUser" ) {
-				$ret = GalleryCoreApi::removeMapEntry('ExternalIdMap', array('externalId' => $g2user['externalId'], 'entityType' => 'GalleryUser'));
+				$ret = GalleryCoreApi::removeMapEntry('ExternalIdMap', ['externalId' => $g2user['externalId'], 'entityType' => 'GalleryUser']);
 			}
 		}
 	}
@@ -113,11 +113,11 @@ if (function_exists('btev_trigger_error')) {
 	    $usercap = new WP_User($wpuser->ID);
 		if ($usercap->has_cap('gallery2_user')) {
 		 // Find User by UserName to Remap
-            list ($ret, $g2user ) = GalleryCoreApi::fetchUserByUsername($usercap->user_login);
+            [$ret, $g2user] = GalleryCoreApi::fetchUserByUsername($usercap->user_login);
 			if ($ret) // Secondary Find by Email Address
-				list ($ret, $g2user ) = g2_fetchUserByUserEmail($usercap->user_email);	
+				[$ret, $g2user] = g2_fetchUserByUserEmail($usercap->user_email);	
 			if (!$ret) { 
-				list ($ret, $g2_results) = GalleryCoreApi::getMapEntry('ExternalIdMap', array('entityId'), array('entityId' => $g2user->id, 'entityType' => 'GalleryUser'));
+				[$ret, $g2_results] = GalleryCoreApi::getMapEntry('ExternalIdMap', ['entityId'], ['entityId' => $g2user->id, 'entityType' => 'GalleryUser']);
 				if (!($g2_result = $g2_results->nextResult())) {
 					GalleryEmbed::addExternalIdMapEntry($wpuser->ID, $g2user->id, 'GalleryUser');
 				} else
@@ -135,7 +135,7 @@ if (function_exists('btev_trigger_error')) {
 	}
 
 // Get G2 Mapping
-	list ($ret, $g2users) = GalleryEmbed::getExternalIdMap('entityId');
+	[$ret, $g2users] = GalleryEmbed::getExternalIdMap('entityId');
 	if ($ret) {
 		echo __('Fatal G2 error:', 'wpg2') . $ret->getAsHtml();
 		exit;
@@ -143,7 +143,7 @@ if (function_exists('btev_trigger_error')) {
 
 	foreach ($g2users as $g2user) {
 		if ( $g2user['entityType'] == "GalleryUser" ) {
-			$ret = GalleryCoreApi::removeMapEntry( 'ExternalIdMap', array('externalId' => $g2array[$entity], 'entityType' => 'GalleryUser'));
+			$ret = GalleryCoreApi::removeMapEntry( 'ExternalIdMap', ['externalId' => $g2array[$entity], 'entityType' => 'GalleryUser']);
 			$g2entityarray[$g2user['externalId']] = $g2user['entityId'];
 		}
 	}
@@ -172,7 +172,7 @@ if (function_exists('btev_trigger_error')) {
 		$wpuserid = $wpuser->ID;
 		if ($userdata->has_cap('gallery2_user') && $userdata->has_cap('gallery2_admin') && $g2entityarray[$wpuserid] != '' ) {
 			// Output WP Infomation
-			if ( strlen($userdata->user_pass) > 32 )
+			if ( strlen((string) $userdata->user_pass) > 32 )
 				$wpg2_passwordhash = '<font color="red">Incompatible</font>';
 			else
 				$wpg2_passwordhash = 'Compatible';
@@ -219,7 +219,7 @@ if (function_exists('btev_trigger_error')) {
 		if ($userdata->has_cap('gallery2_user') && !$userdata->has_cap('gallery2_admin') && $g2entityarray[$wpuserid] != '' ) {
 			// Output WP Infomation
 			$email = $userdata->user_email;
-			if ( strlen($userdata->user_pass) > 32 )
+			if ( strlen((string) $userdata->user_pass) > 32 )
 				$wpg2_passwordhash = '<font color="red">Incompatible</font>';
 			else
 				$wpg2_passwordhash = 'Compatible';
@@ -269,7 +269,7 @@ if (function_exists('btev_trigger_error')) {
 		if (!$userdata->has_cap('gallery2_user') || $g2entityarray[$wpuserid] == '' ) {
 			// Output WP Infomation
 			$email = $userdata->user_email;
-			if ( strlen($userdata->user_pass) > 32 )
+			if ( strlen((string) $userdata->user_pass) > 32 )
 				$wpg2_passwordhash = '<font color="red">Incompatible</font>';
 			else
 				$wpg2_passwordhash = 'Compatible';
@@ -283,7 +283,7 @@ if (function_exists('btev_trigger_error')) {
 			echo '<td align="center">' . $userdata->user_firstname  . ' ' . $userdata->user_lastname . '</td>';
 			echo '<td align="center"><a href="mailto:' . $email . '" title="' . __('e-mail: ', 'wpg2') . $email . '">' . $email . '</a></td>';
 			echo '<td align="center">'.$wpg2_passwordhash.'</td>';
-			if ( strlen($userdata->user_pass) > 32 )
+			if ( strlen((string) $userdata->user_pass) > 32 )
 				echo '<td align="center">'.__('NA','wpg2').'</td>';
 			else
 				echo '<td align="center"><a href="profile.php?page=wpg2/wpg2usersadmin.php&auser_id=' . $userdata->ID . '">' . __('Grant G2 User', 'wpg2') . '</a></td>';

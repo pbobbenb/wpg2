@@ -118,9 +118,9 @@ function wpg2_validate($wpg2_outputtype) {
 	// Test G2 Version
 		if (!$validate_err) {
 			$environment_html .= __('5. Gallery2 Version Compatible? - [' , 'wpg2');
-			list ($ret, $core) = GalleryCoreApi::loadPlugin('module', 'core', true);
+			[$ret, $core] = GalleryCoreApi::loadPlugin('module', 'core', true);
 	        $g2version = $core->getInstalledVersions();
-			$g2version = substr($g2version['gallery'],0,3);
+			$g2version = substr((string) $g2version['gallery'],0,3);
 			if ($wpg2_option['g2_version_low'] <= $g2version)
 				$environment_html .= '<font color="green">' . __('Success', 'wpg2') . '</font>';
 			else {
@@ -136,7 +136,7 @@ function wpg2_validate($wpg2_outputtype) {
 			$environment_html .= __('6. Gallery2 Module: ImageBlock Active? - [' , 'wpg2');
 			$g2_image_block_active = 0;
 			$g2_moduleid = 'imageblock';
-			list ($ret, $g2_modulestatus ) = GalleryCoreApi::fetchPluginStatus('module');
+			[$ret, $g2_modulestatus] = GalleryCoreApi::fetchPluginStatus('module');
 			if (!$ret) {
 				if (isset($g2_modulestatus[$g2_moduleid]) && !empty($g2_modulestatus[$g2_moduleid]['active']) && $g2_modulestatus[$g2_moduleid]['active'])
 					$environment_html .= '<font color="green">' . __('Success', 'wpg2') . '</font>';
@@ -156,7 +156,7 @@ function wpg2_validate($wpg2_outputtype) {
 			GalleryCoreApi::requireOnce('modules/core/classes/GalleryRepositoryUtilities.class');
 			$plugin = new ImageBlockModule;
 			$version = $plugin->getVersion();
-			$version_comparison = GalleryRepositoryUtilities::compareRevisions($version,$wpg2_option['g2_imageblock_version_low']);
+			$version_comparison = (new GalleryRepositoryUtilities)->compareRevisions($version,$wpg2_option['g2_imageblock_version_low']);
 			if ($version_comparison != 'older') {
 				$environment_html .= '<font color="green">' . __('Success', 'wpg2') . '</font>';
 			} else {
@@ -267,10 +267,10 @@ function wpg2_validate($wpg2_outputtype) {
 		else {
 			if (!$wpg2_option['g2_rewriteactive'] == 'active') {
 				$g2_moduleid = 'rewrite';
-				list ($ret, $g2_modulestatus ) = GalleryCoreApi::fetchPluginStatus('module');
+				[$ret, $g2_modulestatus] = GalleryCoreApi::fetchPluginStatus('module');
 				if (!$ret && isset($g2_modulestatus[$g2_moduleid]) && !empty($g2_modulestatus[$g2_moduleid]['active']) && $g2_modulestatus[$g2_moduleid]['active']) {
 				// Deactivate Rewrite Module as Wordpress Permalink Array will be wrong.
-					list ($ret, $ignored) = GalleryCoreApi::deactivatePlugin('module', 'rewrite');
+					[$ret, $ignored] = GalleryCoreApi::deactivatePlugin('module', 'rewrite');
 					if (!$ret)
 						define("G2REWRITEDEACTIVATED", "True");
 				}
