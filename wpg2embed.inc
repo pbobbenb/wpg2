@@ -587,9 +587,13 @@ function wpg2_validateuri($wpg2uri) {
 
 	@include_once(ABSPATH . $wpg2base . $slash . 'g2embeddiscoveryutilities.class');
 	[$success, $errorString] = G2EmbedDiscoveryUtilities::verifyUri($wpg2uri);
+	var_dump($wpg2uri);
+	var_dump($success);
+	var_dump($errorString);
+	$ret = '';
 	if (!$success) {
 		// Return Error
-		$ret =  $errorString;
+		$ret = $errorString;
 	}
 
 	return $ret;
@@ -800,7 +804,7 @@ function g2_tagimageblock( $g2inputstr ) {
 			$g2itemsize = substr ((string) $g2inputstr, $g2itempos+1);
 			$g2itemid = substr ((string) $g2inputstr, 0, $g2itempos);
 		} else {
-			$g2itemsize = $wpg2_option['g2_postimgsize'];
+			$g2itemsize = $wpg2_option['g2_postimgsize'] ?? '';
 			$g2itemid = $g2inputstr;
 		}
 
@@ -826,6 +830,7 @@ function g2_tagimageblock( $g2inputstr ) {
 		$blockoptions['blocks'] = 'specificItem';
 		$blockoptions['show'] = 'none';
 		$blockoptions['itemId'] = $g2itemid;
+		$wpg2_option['g2_tagblockshow'] = '';
 
 		// Assign Show Details
 		if ( $wpg2_option['g2_tagblockshow'] ) {
@@ -1301,9 +1306,11 @@ function g2_getLightImageBlock($params,$size=null,$cssclass=null) {
 	}
 
 	global $gallery;
+	
 	$moduleId = 'imageblock';
 	$blockHtml = $headHtml = null;
 
+	$ret = '';
 	if ($ret) {
 	    return [$ret, null, null];
 	}
