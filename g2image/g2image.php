@@ -530,7 +530,7 @@ function g2ic_make_html_controls(){
 		GalleryCoreApi::requireOnce('modules/core/classes/GalleryRepositoryUtilities.class');
 		$plugin = new ImageBlockModule;
 		$version = $plugin->getVersion();
-		$version_comparison = GalleryRepositoryUtilities::compareRevisions($version,'1.0.9');
+		(new GalleryRepositoryUtilities)->compareRevisions($version,'1.0.9');
 		if ($version_comparison != 'older') {
 			$html .= '            <div name="wpg2_tag_size_textbox"';
 			if ($g2ic_options['default_action'] == 'wpg2_image'){
